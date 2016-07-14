@@ -1,4 +1,6 @@
 *.swp
-_containers.yml
 Gemfile.lock
 archive/*.tar
+modules/*
+!modules/.keep
+*.gem

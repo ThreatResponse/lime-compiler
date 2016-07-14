@@ -1,18 +1,30 @@
-# Running
+# Lime Compiler
 
-   ./bin/lime-compiler -c /conf/config.yml
+## Running
 
-# Requirements
+    ./bin/lime-compiler -c /conf/config.yml
 
-Ensure docker is installed and the user running can write to the docker socket
+## Requirements
 
-# TODO:
+Ensure docker is installed and the user running `lime-compiler` can write to the docker socket
 
-- documentation
-- implement logging
-- test gem installation
+## Installation
 
-    # installation instructions
+Install from github:  
+
     gem install specific_install
-    gem specific_install -l <this git repo>
+    gem specific_install -l https://github.com/ThreatResponse/ruby-lime-compiler-private.git
 
+Build and install locally:  
+
+    gem build lime-compiler.gemspec
+    gem install lime-compiler-0.0.1.gem
+
+Gem installation places `lime-compiler` in the systems path
+
+
+## TODO:
+
+- document config structure
+- implement logging
+- test debian support
