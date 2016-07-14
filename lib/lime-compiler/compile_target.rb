@@ -15,6 +15,7 @@ module LimeCompiler
       @source_postfix = @distro['kernel_source_postfix'] ||= ''
       @archive_dir = opts[:archive_dir]
       @archive_name = "#{opts[:archive_name]}.tar"
+      @module_dir = opts[:module_dir]
 
       @logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler.compile-target'
@@ -91,7 +92,7 @@ module LimeCompiler
       end
     end
 
-    def write_archive
+    def write_archive clobber = false
       archive_path = File.join(File.expand_path(@archive_dir),@archive_name)
       @logger.info "writing modules to file #{archive_path}"
       File.open(archive_path, 'wb') do |file|
@@ -100,9 +101,23 @@ module LimeCompiler
         end
       end
 
-      # TODO: rework this big time
       @logger.info "expanding archive: #{archive_path}"
-      system("tar -xf #{archive_path} --keep-old-files")
+      extract = Gem::Package::TarReader.new(File.open(archive_path, 'r'))
+      extract.each do |entry|
+        if entry.file?
+          # strip one modules from the start of the file
+          filename = entry.full_name.gsub(/^modules\//, '')
+          #logger.debug "tar contains #{filename}"
+
+          path = File.join(File.expand_path(@module_dir),filename)
+          unless File.exists?(path) and clobber
+            @logger.debug "writing #{path}"
+            File.open(path, 'wb') do |f|
+              f.write(entry.read)
+            end
+          end
+        end
+      end
     end
 
     def kernel_packages(output)

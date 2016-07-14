@@ -27,6 +27,7 @@ module LimeCompiler
         config = YAML::load_file(opts[:config])
       rescue Exception => e
         @@logger.fatal e.message
+        @@logger.debug e.backtrace.inspect
         exit(1)
       end
 
@@ -48,6 +49,7 @@ module LimeCompiler
 
         target = CompileTarget.new(name: container_name, archive_name: name,
                                    archive_dir: opts[:archive_dir],
+                                   module_dir: opts[:module_dir],
                                    distro: distro, container: c)
 
         begin
@@ -61,6 +63,7 @@ module LimeCompiler
           target.write_archive
         rescue Exception => e
           @@logger.fatal e.message
+          @@logger.debug e.backtrace.inspect
         end
 
         client.cleanup_container(c, delete: false)
