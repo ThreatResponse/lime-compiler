@@ -9,8 +9,9 @@ module LimeCompiler
 
     def options
       if @opts.empty?
+        verbose = false
+
         parser = OptionParser.new
-        # TODO: update banner
         parser.banner = "Usage: lime-compiler [options]"
 
         parser.on("-h", "--help", "Show this help message") do ||
@@ -30,7 +31,15 @@ module LimeCompiler
           @opts[:archive_dir] = v
         end
 
+        parser.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+          @opts[:verbose] = v
+        end
+
         parser.parse!
+
+        if @opts[:verbose].nil?
+          @opts[:verbose] = verbose
+        end
 
         if @opts[:config].nil? || @opts[:module_dir].nil? || @opts[:archive_dir].nil?
           puts parser

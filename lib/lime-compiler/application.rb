@@ -11,57 +11,68 @@ module LimeCompiler
       cli = Cli.new
       opts = cli.options
 
+      @@logger = Logger.new(STDOUT).tap do |log|
+        log.progname = 'lime-compiler'
+      end
+
+      if opts[:verbose]
+        @@logger.level = Logger::DEBUG
+      else
+        @@logger.level = Logger::INFO
+      end
+
       begin
+        @@logger.debug "validating options #{opts}"
         cli.validate opts
         config = YAML::load_file(opts[:config])
       rescue Exception => e
-        logger.fatal
-        puts e.message
+        @@logger.fatal e.message
         exit(1)
       end
-
-      puts opts
-
-
-      exit
 
       client = LimeCompiler::DockerClient.new(config['docker']['url'])
 
       config['images'].each do |name, image|
-        puts "pulling latest for #{image['image']}:#{image['tag']}"
+        @@logger.info "pulling latest for #{image['image']}:#{image['tag']}"
         client.pull(image['image'], image['tag'])
       end
 
-      # TODO: process images inline
       config['images'].each do |name, image|
         container_name = "lime_build_#{image['image']}_#{image['tag']}"
         distro_name = image['distribution']
         distro = config['distributions'][distro_name]
 
-        # TODO: replace debug prints with nice info message
-        #puts distro_name
-        #puts distro
-
+        @@logger.info "creating container #{container_name} from #{image['image']}:#{image['tag']}"
         c = client.container(container_name, image['image'], image['tag'],
                              'start': true, 'reuse': true)
 
-        target = CompileTarget.new(container_name, name, distro, c)
-        target.pre_actions
-        target.update_sources
-        target.install_dependencies
-        target.clone_lime
-        target.create_directories
-        target.install_headers
-        target.compile_lime
-        target.write_archive
+        target = CompileTarget.new(name: container_name, archive_name: name,
+                                   archive_dir: opts[:archive_dir],
+                                   distro: distro, container: c)
+
+        begin
+          target.pre_actions
+          target.update_sources
+          target.install_dependencies
+          target.clone_lime
+          target.create_directories
+          target.install_headers
+          target.compile_lime
+          target.write_archive
+        rescue Exception => e
+          @@logger.fatal e.message
+        end
 
         client.cleanup_container(c, delete: false)
 
       end
 
-      # TODO: call host cleanup just to be safe
       client.cleanup_containers(delete: false)
 
+    end
+
+    def self.log_level
+      @@logger.level
     end
 
   end

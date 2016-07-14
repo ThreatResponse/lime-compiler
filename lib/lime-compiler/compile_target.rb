@@ -4,92 +4,96 @@ require_relative 'cli'
 module LimeCompiler
   class CompileTarget
 
-    # TODO: uer configuratble archive path?
-    def initialize name, archive_name, distro, container
-      @name = name
-      @distro = distro
-      @container = container
+    def initialize opts = {}
+    #def initialize name, archive_name, distro, container
+      @name = opts[:name]
+      @distro = opts[:distro]
+      @container = opts[:container]
       @packages = nil
-      @prefix = distro['kernel_package_prefix'] ||= ''
-      @source_dir = distro['source_dir']
-      @source_postfix = distro['kernel_source_postfix'] ||= ''
-      @archive_name = archive_name
+      @prefix = @distro['kernel_package_prefix'] ||= ''
+      @source_dir = @distro['source_dir']
+      @source_postfix = @distro['kernel_source_postfix'] ||= ''
+      @archive_dir = opts[:archive_dir]
+      @archive_name = "#{opts[:archive_name]}.tar"
+
+      @logger = Logger.new(STDOUT).tap do |log|
+        log.progname = 'lime-compiler.compile-target'
+      end
+      @logger.level = Application.log_level
     end
 
-    # TODO: return stdout
     def pre_actions
       unless @distro['pre_actions'].nil?
-        puts "running pre actions for #{@name}"
+        @logger.info "running pre actions for #{@name}"
         @distro['pre_actions'].each do |action|
           resp = @container.exec(action.split(" "), tty: true)
-          puts resp
+          @logger.debug resp[0]
         end
       end
     end
 
     def update_sources
-      puts "updating sources for #{@name}"
+      @logger.info "updating sources for #{@name}"
       resp = @container.exec([@distro['packager'], 'update', '-y'] , tty: true)
-      puts resp
+      @logger.debug resp
     end
 
     def install_dependencies
-      puts "installing dependecies for #{@name}"
+      @logger.info "installing dependecies for #{@name}"
       command = [@distro['packager'], 'install', '-y'] + @distro['dependencies']
       resp = @container.exec(command, tty: true)
-      puts resp
+      @logger.debug resp
     end
 
     def clone_lime
-      puts "cloning LiME to /LiME for #{@name}"
+      @logger.info "cloning LiME to /LiME for #{@name}"
       command = "git clone https://github.com/504ensicsLabs/LiME.git".split(" ")
       resp = @container.exec(command , tty: true)
-      puts resp
+      @logger.debug resp
     end
 
     def create_directories
-      puts "creating module output dir /opt/modules for #{@name}"
+      @logger.info "creating module output dir /opt/modules for #{@name}"
       command = "mkdir -p /opt/modules".split(" ")
       resp = @container.exec(command , tty: true)
-      puts resp
+      @logger.debug resp
     end
 
     def install_headers
-      puts "installing kernel headers for #{@name}"
+      @logger.info "installing kernel headers for #{@name}"
       resp = @container.exec(@distro['kernel_packages'].split(" "), tty: true)
-      puts resp
+      @logger.debug resp
       @packages = kernel_packages(resp[0])
-      puts @packages
+      @logger.debug @packages
 
       # TODO: move to individual install commands to avoid exec timeouts?
       @packages = @packages.map {|val| "#{@prefix}#{val}"}
       command = [@distro['packager'], 'install', '-y'] + @packages
       resp = @container.exec(command, tty: true)
-      puts resp
+      @logger.debug resp
     end
 
     def compile_lime
       resp = @container.exec(['ls', @source_dir], tty: true)
-      puts resp
 
       kernels = kernel_modules(resp[0])
-      puts kernels
+      @logger.debug "kernels sources found #{kernels}"
 
+      @logger.info "compiling kernel sources"
       kernels.each do |kernel|
-        puts "module: #{kernel}"
+        @logger.debug "module: #{kernel}"
         command = "make -C #{@source_dir}/#{kernel}#{@source_postfix} M=/LiME/src"
         resp = @container.exec(command.split(" "), tty: true)
-        puts resp
+        @logger.debug resp
         command = "mv /LiME/src/lime.ko /opt/modules/lime-#{kernel}.ko"
         resp = @container.exec(command.split(" "), tty: true)
-        puts resp
+        @logger.debug resp
       end
-
     end
 
     def write_archive
-      archive_path = "archive/#{@archive_name}.tar"
-      puts "writing modules to file #{archive_path}"
+      archive_path = File.join(File.expand_path(@archive_dir),@archive_name)
+      @logger.info "writing modules to file #{archive_path}"
       File.open(archive_path, 'wb') do |file|
         @container.copy("/opt/modules") do |chunk|
           file.write(chunk)
@@ -97,7 +101,7 @@ module LimeCompiler
       end
 
       # TODO: rework this big time
-      puts "expanding archive: #{archive_path}"
+      @logger.info "expanding archive: #{archive_path}"
       system("tar -xf #{archive_path} --keep-old-files")
     end
 
@@ -114,9 +118,9 @@ module LimeCompiler
         if tokens[match_position].include? match
           package = tokens[package_position]
           packages << package
-          puts "matched kernel: #{package}"
+          @logger.debug "matched kernel: #{package}"
         else
-          puts "match failed #{tokens[match_position]} for #{match}"
+          @logger.debug "match failed #{tokens[match_position]} for #{match}"
         end
       end
 

@@ -13,6 +13,11 @@ module LimeCompiler
                     :create_output_dir => ['mkdir', '-p', '/opt/modules']}
       @containers = []
       @images = []
+
+      @logger = Logger.new(STDOUT).tap do |log|
+        log.progname = 'lime-compiler.docker-client'
+      end
+      @logger.level = Application.log_level
     end
 
     def pull image, tag, opts = {}
@@ -41,17 +46,17 @@ module LimeCompiler
                                              'Cmd': opts[:command] )
       rescue Docker::Error::ConflictError
         if opts[:reuse]
-          puts "container with name: #{name} already exists"
-          puts "re-using #{name}"
+          @logger.info "container with name: #{name} already exists"
+          @logger.info "re-using #{name}"
           container = Docker::Container.get(name)
         else
-          puts "container with  #{name} already exists"
+          @logger.fatal "container with  #{name} already exists"
           raise
         end
       end
 
       if opts[:start]
-        puts "starting #{name}"
+        @logger.info "starting #{name}"
         container.start
       end
       if opts[:register]
@@ -69,11 +74,11 @@ module LimeCompiler
       container.refresh!
       @containers.delete(id)
       if container.info['State'] == 'running'
-        puts "stopping #{name}"
+        @logger.info "stopping #{name}"
         container.stop
       end
       if opts[:delete]
-        puts "deleting #{name}"
+        @logger.info "deleting #{name}"
         container.delete
       end
 
