@@ -1,3 +1,4 @@
+require 'logger'
 require 'yaml'
 require_relative 'cli'
 require_relative 'compile_target'
@@ -11,14 +12,18 @@ module LimeCompiler
       opts = cli.options
 
       begin
+        cli.validate opts
         config = YAML::load_file(opts[:config])
-      # TODO: rescue yaml syntax error
-      rescue Errno::ENOENT
-        puts "configuration file not found: #{opts[:config]}"
+      rescue Exception => e
+        logger.fatal
+        puts e.message
         exit(1)
       end
 
-      # TODO: validate config
+      puts opts
+
+
+      exit
 
       client = LimeCompiler::DockerClient.new(config['docker']['url'])
 

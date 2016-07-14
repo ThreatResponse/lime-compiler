@@ -22,9 +22,17 @@ module LimeCompiler
           @opts[:config] = v
         end
 
+        parser.on("-m", "--moduledir modules/", "[Required] module output directory") do |v|
+          @opts[:module_dir] = v
+        end
+
+        parser.on("-a", "--archive archive/", "[Required] archive output directory") do |v|
+          @opts[:archive_dir] = v
+        end
+
         parser.parse!
 
-        if @opts[:config].nil?
+        if @opts[:config].nil? || @opts[:module_dir].nil? || @opts[:archive_dir].nil?
           puts parser
           exit(1)
         end
@@ -33,6 +41,12 @@ module LimeCompiler
 
       @opts
 
+    end
+
+    def validate opts
+      raise "invalid archive directory path" unless File.directory?(opts[:archive_dir])
+      raise "invalid module directory path" unless File.directory?(opts[:module_dir])
+      raise "invalid config file path" unless File.exist?(opts[:config])
     end
 
   end
