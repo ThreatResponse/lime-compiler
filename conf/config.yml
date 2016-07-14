@@ -33,8 +33,29 @@ distributions:
       - 'make'
       - 'gcc'
       - 'dpkg-dev'
+  debian:
+    packager: '/usr/bin/apt-get'
+    kernel_packages: '/usr/bin/apt-cache search linux-headers-*'
+    kernel_package_match: 'linux-headers-'
+    match_position: 0
+    kernel_position: 0
+    kernel_source_postfix: '/build'
+    source_dir: '/lib/modules'
+    dependencies:
+      - 'git'
+      - 'make'
+      - 'gcc'
+      - 'dpkg-dev'
 
 images:
+  debian7:
+    image: "debian"
+    tag: "7"
+    distribution: 'debian'
+  debian8:
+    image: "debian"
+    tag: "8"
+    distribution: 'debian'
   centos6:
     image: "centos"
     tag: "6"
