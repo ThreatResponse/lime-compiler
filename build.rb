@@ -65,27 +65,57 @@ Excon.defaults[:read_timeout] = 2000
 config = YAML::load_file(File.join(File.dirname(File.expand_path(__FILE__)),
                                    'config.yml'))
 
+distributions = config['distributions']
+images = config['images']
+command = ["bash", "-c", "/usr/bin/tail -f /dev/null"]
+
 # load container ids from file
 containers = {}
+containers_config = {}
 begin
   containers_config = YAML::load_file(File.join(File.dirname(File.expand_path(__FILE__)),
                                                 '_containers.yml'))
   containers_config.each do |key, value|
-    containers.merge!({ key => Docker::Container.get(value[:id]) })
+    # TODO: create container if doesn't exist
+    begin
+      containers.merge!({ key => Docker::Container.get(value[:id]) })
+    rescue
+      # pull
+      image = Docker::Image.create('fromImage': value[:image])
+      # create
+      #centainers.merge!({ key => Docker::Container.create('Image': value[:image],
+      container = Docker::Container.create('Image': value[:image],
+                                           'name' => value[:name],
+                                           'Cmd': command)
+      containers.merge!({ key => container })
+      containers_config.merge!({ key => {'id': container.id, 'name': value[:name], 'image': value[:image]} })
+
+    end
   end
 rescue
+  images.each do |key, value|
+    dockerhub_id = "#{value['image']}:#{value['tag']}"
+    name = "lime_build_#{value['image']}_#{value['tag']}"
+    image = Docker::Image.create('fromImage': dockerhub_id)
+    #centainers.merge!({ key => Docker::Container.create('Image': dockerhub_id,
+    container = Docker::Container.create('Image': dockerhub_id,
+                                         'name' => name,
+                                         'Cmd': command)
+    containers.merge!({ key => container})
+    containers_config.merge!({ key => {'id': container.id, 'name': name, 'image': dockerhub_id} })
+  end
+
+  # TODO: create containers if doesn't exist
   puts 'todo'
 end
 
 # TODO: remove debug print
-puts containers
 containers.each do |key, value|
   puts "#{key}: #{value.info['Name']}"
 end
-exit
+#exit
 
-distributions = config['distributions']
-images = config['images']
+File.open(File.join(File.dirname(File.expand_path(__FILE__)), '_containers.yml'), 'w') { |f| f.write containers_config.to_yaml }
 
 
 images.each do |key, value|
@@ -96,19 +126,12 @@ images.each do |key, value|
 
     distro = distributions[value['distribution']]
     @logger.debug distro
-    @logger.info "pulling latest from #{dockerhub_id}"
-    image = Docker::Image.create('fromImage': dockerhub_id)
-    # run commands here to install kernel modules
-    # then save image
-    @logger.debug "image id: #{image.id}"
+    #@logger.info "pulling latest from #{dockerhub_id}"
 
     # keep our container running indefinately
-    command = ["bash", "-c", "/usr/bin/tail -f /dev/null"]
     name = "#{dockerhub_id}-limebuild"
     begin
-      container = Docker::Container.create("Cmd": command,
-                                           "Image": image.id,
-                                           "Tty": true)
+      container = containers[key]
       container.start
     rescue Exception => e
       # for now assume that the container already exists
@@ -197,10 +220,10 @@ images.each do |key, value|
 
     @logger.info "expanding archive: #{archive_path}"
     # TODO: do this natively
-    system("tar -xf #{archive_path}")
+    system("tar -xf #{archive_path} --keep-old-files")
 
     container.stop
-    container.delete
+    #container.delete
 
   rescue Exception => e
     @logger.warn e.message
@@ -208,7 +231,7 @@ images.each do |key, value|
     @logger.warn e.backtrace.inspect
     unless container.nil?
       container.stop
-      container.delete
+      #container.delete
     end
   end
 

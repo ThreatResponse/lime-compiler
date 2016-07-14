@@ -1,0 +1,59 @@
+---
+distributions:
+  centos:
+    packager: '/usr/bin/yum'
+    kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
+    kernel_package_match: 'kernel-devel.x86_64'
+    match_position: 0
+    kernel_position: 1
+    kernel_package_prefix: 'kernel-devel-'
+    source_dir: '/usr/src/kernels'
+    dependencies:
+      - 'git'
+      - 'make'
+      - 'gcc'
+    pre_actions:
+      - "/bin/sed -i s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-Vault.repo"
+  ubuntu:
+    packager: '/usr/bin/apt-get'
+    kernel_packages: '/usr/bin/apt-cache search linux-headers-.*-generic$'
+    kernel_package_match: 'linux-headers-'
+    match_position: 0
+    kernel_position: 0
+    kernel_source_postfix: '/build'
+    source_dir: '/lib/modules'
+    dependencies:
+      - 'git'
+      - 'make'
+      - 'gcc'
+      - 'dpkg-dev'
+
+images:
+  centos6:
+    image: "centos"
+    tag: "6"
+    distribution: 'centos'
+  centos7:
+    image: "centos"
+    tag: "7"
+    distribution: 'centos'
+  ubuntu-12.04:
+    image: "ubuntu"
+    tag: "12.04"
+    distribution: "ubuntu"
+  ubuntu-14.04:
+    image: "ubuntu"
+    tag: "14.04"
+    distribution: 'ubuntu'
+  ubuntu-15.10:
+    image: "ubuntu"
+    tag: "15.10"
+    distribution: "ubuntu"
+  ubuntu-16.04:
+    image: "ubuntu"
+    tag: "16.04"
+    distribution: "ubuntu"
+  ubuntu-16.10:
+    image: "ubuntu"
+    tag: "16.10"
+    distribution: "ubuntu"
