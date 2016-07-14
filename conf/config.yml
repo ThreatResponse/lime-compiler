@@ -1,4 +1,10 @@
 ---
+docker:
+  url: 'unix:///var/run/docker.sock'
+  # the following two options are not required
+  #write_timeout: 1800
+  #read_timeout: 1800
+
 distributions:
   centos:
     packager: '/usr/bin/yum'
@@ -29,31 +35,27 @@ distributions:
       - 'dpkg-dev'
 
 images:
-  centos6:
-    image: "centos"
-    tag: "6"
-    distribution: 'centos'
-  centos7:
-    image: "centos"
-    tag: "7"
-    distribution: 'centos'
-  ubuntu-12.04:
-    image: "ubuntu"
-    tag: "12.04"
-    distribution: "ubuntu"
-  ubuntu-14.04:
-    image: "ubuntu"
-    tag: "14.04"
-    distribution: 'ubuntu'
-  ubuntu-15.10:
-    image: "ubuntu"
-    tag: "15.10"
-    distribution: "ubuntu"
+#  centos6:
+#    image: "centos"
+#    tag: "6"
+#    distribution: 'centos'
+#  centos7:
+#    image: "centos"
+#    tag: "7"
+#    distribution: 'centos'
+#  ubuntu-12.04:
+#    image: "ubuntu"
+#    tag: "12.04"
+#    distribution: "ubuntu"
+#  ubuntu-14.04:
+#    image: "ubuntu"
+#    tag: "14.04"
+#    distribution: 'ubuntu'
+#  ubuntu-15.10:
+#    image: "ubuntu"
+#    tag: "15.10"
+#    distribution: "ubuntu"
   ubuntu-16.04:
     image: "ubuntu"
     tag: "16.04"
-    distribution: "ubuntu"
-  ubuntu-16.10:
-    image: "ubuntu"
-    tag: "16.10"
     distribution: "ubuntu"

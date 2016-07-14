@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'lime-compiler/all'
+rescue LoadError
+  require_relative '../lib/lime-compiler/all'
+end
+
+LimeCompiler::Application.new.run
