@@ -1,11 +1,20 @@
 ---
 docker:
   url: 'unix:///var/run/docker.sock'
-  # the following two options are not required
-  #write_timeout: 1800
-  #read_timeout: 1800
 
 distributions:
+  amzn:
+    packager: 'sudo yum'
+    kernel_packages: 'sudo yum --showduplicates list kernel-devel'
+    kernel_package_match: 'kernel-devel.x86_64'
+    match_position: 0
+    kernel_position: 1
+    kernel_package_prefix: 'kernel-devel-'
+    source_dir: '/usr/src/kernels'
+    dependencies:
+      - 'git'
+      - 'make'
+      - 'gcc'
   centos:
     packager: '/usr/bin/yum'
     kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
@@ -48,6 +57,10 @@ distributions:
       - 'dpkg-dev'
 
 images:
+  amzn:
+    image: "local"
+    tag: "local"
+    distribution: 'amzn'
   debian7:
     image: "debian"
     tag: "7"

@@ -5,7 +5,6 @@ module LimeCompiler
   class CompileTarget
 
     def initialize opts = {}
-    #def initialize name, archive_name, distro, container
       @name = opts[:name]
       @distro = opts[:distro]
       @container = opts[:container]
@@ -47,15 +46,15 @@ module LimeCompiler
     end
 
     def clone_lime
-      @logger.info "cloning LiME to /LiME for #{@name}"
-      command = "git clone https://github.com/504ensicsLabs/LiME.git".split(" ")
+      @logger.info "cloning LiME to /tmp/LiME for #{@name}"
+      command = "git clone https://github.com/504ensicsLabs/LiME.git /tmp/LiME".split(" ")
       resp = @container.exec(command , tty: true)
       @logger.debug resp
     end
 
     def create_directories
-      @logger.info "creating module output dir /opt/modules for #{@name}"
-      command = "mkdir -p /opt/modules".split(" ")
+      @logger.info "creating module output dir /tmp/modules for #{@name}"
+      command = "mkdir -p /tmp/modules".split(" ")
       resp = @container.exec(command , tty: true)
       @logger.debug resp
     end
@@ -83,10 +82,10 @@ module LimeCompiler
       @logger.info "compiling kernel sources"
       kernels.each do |kernel|
         @logger.debug "module: #{kernel}"
-        command = "make -C #{@source_dir}/#{kernel}#{@source_postfix} M=/LiME/src"
+        command = "make -C #{@source_dir}/#{kernel}#{@source_postfix} M=/tmp/LiME/src"
         resp = @container.exec(command.split(" "), tty: true)
         @logger.debug resp
-        command = "mv /LiME/src/lime.ko /opt/modules/lime-#{kernel}.ko"
+        command = "mv /tmp/LiME/src/lime.ko /tmp/modules/lime-#{kernel}.ko"
         resp = @container.exec(command.split(" "), tty: true)
         @logger.debug resp
       end
@@ -96,7 +95,7 @@ module LimeCompiler
       archive_path = File.join(File.expand_path(@archive_dir),@archive_name)
       @logger.info "writing modules to file #{archive_path}"
       File.open(archive_path, 'wb') do |file|
-        @container.copy("/opt/modules") do |chunk|
+        @container.copy("/tmp/modules") do |chunk|
           file.write(chunk)
         end
       end
@@ -107,7 +106,6 @@ module LimeCompiler
         if entry.file?
           # strip one modules from the start of the file
           filename = entry.full_name.gsub(/^modules\//, '')
-          #logger.debug "tar contains #{filename}"
 
           path = File.join(File.expand_path(@module_dir),filename)
           unless File.exists?(path) and clobber
@@ -126,9 +124,8 @@ module LimeCompiler
       match = @distro['kernel_package_match']
       match_position = @distro['match_position']
       package_position = @distro['kernel_position']
-
       output.each do |line|
-        line.gsub!(/\x0A/, '').strip!.chomp!
+        line = line.gsub(/\x0A/, '').strip.chomp
         tokens = line.split(" ")
         if tokens[match_position].include? match
           package = tokens[package_position]
@@ -145,7 +142,7 @@ module LimeCompiler
     def kernel_modules(output)
       modules = []
       output.each do |line|
-        line.gsub!(/\x0A/, '').strip!.chomp!
+        line = line.gsub(/\x0A/, '').strip.chomp
         tokens = line.split(" ")
         tokens.each do |token|
           modules << token

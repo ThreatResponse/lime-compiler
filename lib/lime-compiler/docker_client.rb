@@ -66,20 +66,22 @@ module LimeCompiler
     end
 
     def cleanup_container container, opts = {}
-      defaults = {'delete': true}
+      defaults = {'delete': true, 'local_run': false}
       opts = defaults.merge(opts)
 
-      name = container.info['Name']
-      id = container.id
-      container.refresh!
-      @containers.delete(id)
-      if container.info['State'] == 'running'
-        @logger.info "stopping #{name}"
-        container.stop
-      end
-      if opts[:delete]
-        @logger.info "deleting #{name}"
-        container.delete
+      unless opts[:local_run]
+        name = container.info['Name']
+        id = container.id
+        container.refresh!
+        @containers.delete(id)
+        if container.info['State'] == 'running'
+          @logger.info "stopping #{name}"
+          container.stop
+        end
+        if opts[:delete]
+          @logger.info "deleting #{name}"
+          container.delete
+        end
       end
 
     end

@@ -2,6 +2,7 @@ require 'logger'
 require 'yaml'
 require_relative 'cli'
 require_relative 'compile_target'
+require_relative 'local_system'
 
 module LimeCompiler
   class Application
@@ -34,24 +35,36 @@ module LimeCompiler
       client = LimeCompiler::DockerClient.new(config['docker']['url'])
 
       config['images'].each do |name, image|
-        @@logger.info "pulling latest for #{image['image']}:#{image['tag']}"
-        client.pull(image['image'], image['tag'])
+        unless image['image'] == 'local'
+          @@logger.info "pulling latest for #{image['image']}:#{image['tag']}"
+          client.pull(image['image'], image['tag'])
+        end
       end
 
       config['images'].each do |name, image|
+
+        if image['image'] == 'local'
+          local_run = true
+        else
+          local_run = false
+        end
+
         container_name = "lime_build_#{image['image']}_#{image['tag']}"
         distro_name = image['distribution']
         distro = config['distributions'][distro_name]
 
-        @@logger.info "creating container #{container_name} from #{image['image']}:#{image['tag']}"
-        c = client.container(container_name, image['image'], image['tag'],
-                             'start': true, 'reuse': true)
+        if local_run
+          c = LocalSystem.new
+        else
+          @@logger.info "creating container #{container_name} from #{image['image']}:#{image['tag']}"
+          c = client.container(container_name, image['image'], image['tag'],
+                               'start': true, 'reuse': true)
+        end
 
         target = CompileTarget.new(name: container_name, archive_name: name,
                                    archive_dir: opts[:archive_dir],
                                    module_dir: opts[:module_dir],
                                    distro: distro, container: c)
-
         begin
           target.pre_actions
           target.update_sources
@@ -66,7 +79,7 @@ module LimeCompiler
           @@logger.debug e.backtrace.inspect
         end
 
-        client.cleanup_container(c, delete: false)
+        client.cleanup_container(c, delete: false, local_run: local_run)
 
       end
 
