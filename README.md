@@ -1,8 +1,15 @@
 # Lime Compiler
 
-## Running
+## Usage
 
-    ./bin/lime-compiler -c /conf/config.yml
+    Usage: lime-compiler [options]
+        -h, --help                       Show this help message
+        -c, --config config.yml          [Required] path to config file
+        -m, --moduledir modules/         [Required] module output directory
+        -a, --archive archive/           [Required] archive output directory
+        -v, --[no-]verbose               Run verbosely
+
+You can run straight from the repository, using the provided archive and modules directories
 
 ## Requirements
 
@@ -25,6 +32,8 @@ Gem installation places `lime-compiler` in the systems path
 
 ## TODO:
 
+- support uploading to s3
+- test suite
 - document config structure
-- implement logging
-- test debian support
+- parallel builds?
+- sign kernel modules
