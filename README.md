@@ -1,5 +1,15 @@
 # Lime Compiler
 
+Builds LiME Kernel modules for:
+- Centos 6
+- Centos 7
+- Debian 7
+- Debian 8
+- Ubuntu 12.04
+- Ubuntu 14.04
+- Ubuntu 15.10
+- Ubuntu 16.04
+
 ## Usage
 
     Usage: lime-compiler [options]
