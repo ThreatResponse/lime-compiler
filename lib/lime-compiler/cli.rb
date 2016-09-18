@@ -19,6 +19,11 @@ module LimeCompiler
           exit(0)
         end
 
+        parser.on("-v", "--version", "Print gem version") do ||
+          puts LimeCompiler::VERSION
+          exit(0)
+        end
+
         parser.on("-c", "--config config.yml", "[Required] path to config file") do |v|
           @opts[:config] = v
         end
@@ -31,7 +36,7 @@ module LimeCompiler
           @opts[:archive_dir] = v
         end
 
-        parser.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+        parser.on("--[no-]verbose", "Run verbosely") do |v|
           @opts[:verbose] = v
         end
 
