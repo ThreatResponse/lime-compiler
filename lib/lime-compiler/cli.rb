@@ -10,6 +10,7 @@ module LimeCompiler
     def options
       if @opts.empty?
         verbose = false
+        clobber = false
 
         parser = OptionParser.new
         parser.banner = "Usage: lime-compiler [options]"
@@ -36,6 +37,10 @@ module LimeCompiler
           @opts[:archive_dir] = v
         end
 
+        parser.on("--clobber", "Overwrite existing files in the module output directory") do |v|
+          @opts[:clobber] = v
+        end
+
         parser.on("--[no-]verbose", "Run verbosely") do |v|
           @opts[:verbose] = v
         end
@@ -44,6 +49,10 @@ module LimeCompiler
 
         if @opts[:verbose].nil?
           @opts[:verbose] = verbose
+        end
+
+        if @opts[:clobber].nil?
+          @opts[:clobber] = clobber
         end
 
         if @opts[:config].nil? || @opts[:module_dir].nil? || @opts[:archive_dir].nil?

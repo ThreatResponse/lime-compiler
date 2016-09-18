@@ -73,7 +73,7 @@ module LimeCompiler
           target.create_directories
           target.install_headers
           target.compile_lime
-          target.write_archive
+          target.write_archive clobber: opts[:clobber]
         rescue Exception => e
           @@logger.fatal e.message
           @@logger.debug e.backtrace.inspect

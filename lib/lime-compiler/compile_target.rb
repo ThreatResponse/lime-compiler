@@ -91,7 +91,7 @@ module LimeCompiler
       end
     end
 
-    def write_archive clobber = false
+    def write_archive clobber: false
       archive_path = File.join(File.expand_path(@archive_dir),@archive_name)
       @logger.info "writing modules to file #{archive_path}"
       File.open(archive_path, 'wb') do |file|
@@ -108,7 +108,8 @@ module LimeCompiler
           filename = entry.full_name.gsub(/^modules\//, '')
 
           path = File.join(File.expand_path(@module_dir),filename)
-          unless File.exists?(path) and clobber
+          # overwrite files only if clobber is true
+          if !File.exists?(path) or clobber
             @logger.debug "writing #{path}"
             File.open(path, 'wb') do |f|
               f.write(entry.read)
