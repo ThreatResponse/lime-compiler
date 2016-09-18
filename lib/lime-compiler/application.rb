@@ -34,6 +34,8 @@ module LimeCompiler
       end
 
       client = LimeCompiler::DockerClient.new(config['docker']['url'])
+      repo = Repo.new(config['repository'])
+      repo.setup_directories opts[:module_dir]
 
       config['images'].each do |name, image|
         unless image['image'] == 'local'
@@ -64,7 +66,7 @@ module LimeCompiler
 
         target = CompileTarget.new(name: container_name, archive_name: name,
                                    archive_dir: opts[:archive_dir],
-                                   module_dir: opts[:module_dir],
+                                   module_dir: "#{opts[:module_dir]}/modules",
                                    distro: distro, container: c)
         begin
           target.pre_actions
@@ -82,8 +84,11 @@ module LimeCompiler
             modules.each do |mod|
               sig_path = gpg.sign(mod)
 
+              repo.generate_metadata mod, sig_path
             end
           end
+
+          repo.generate_repodata opts[:module_dir]
         rescue Exception => e
           @@logger.fatal e.message
           @@logger.debug e.backtrace.inspect

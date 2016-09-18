@@ -2,6 +2,10 @@
 docker:
   url: 'unix:///var/run/docker.sock'
 
+repository:
+  packager: "lime-compiler info@threatresponse.cloud"
+  platform: "linux"
+
 distributions:
   amzn:
     packager: 'sudo yum'
