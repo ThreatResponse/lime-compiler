@@ -10,6 +10,7 @@ module LimeCompiler
     def options
       if @opts.empty?
         verbose = false
+        gpgsign = false
         clobber = false
 
         parser = OptionParser.new
@@ -41,6 +42,16 @@ module LimeCompiler
           @opts[:clobber] = v
         end
 
+        parser.on("--gpg-sign", "Sign compiled modules") do |v|
+          puts v
+          @opts[:gpgsign] = v
+        end
+
+        parser.on("--gpg-signer identity", "GPG id for module signing") do |v|
+          puts v
+          @opts[:gpgsigner] = v
+        end
+
         parser.on("--[no-]verbose", "Run verbosely") do |v|
           @opts[:verbose] = v
         end
@@ -53,6 +64,10 @@ module LimeCompiler
 
         if @opts[:clobber].nil?
           @opts[:clobber] = clobber
+        end
+
+        if @opts[:gpgsig].nil?
+          @opts[:gpgsig] = gpgsign
         end
 
         if @opts[:config].nil? || @opts[:module_dir].nil? || @opts[:archive_dir].nil?

@@ -100,6 +100,8 @@ module LimeCompiler
         end
       end
 
+      extract_file_paths = []
+
       @logger.info "expanding archive: #{archive_path}"
       extract = Gem::Package::TarReader.new(File.open(archive_path, 'r'))
       extract.each do |entry|
@@ -114,9 +116,12 @@ module LimeCompiler
             File.open(path, 'wb') do |f|
               f.write(entry.read)
             end
+            extract_file_paths << path
           end
         end
       end
+
+      extract_file_paths
     end
 
     def kernel_packages(output)

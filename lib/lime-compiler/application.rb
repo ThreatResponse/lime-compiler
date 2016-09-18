@@ -3,6 +3,7 @@ require 'yaml'
 require_relative 'cli'
 require_relative 'compile_target'
 require_relative 'local_system'
+require_relative 'gpg'
 
 module LimeCompiler
   class Application
@@ -73,7 +74,16 @@ module LimeCompiler
           target.create_directories
           target.install_headers
           target.compile_lime
-          target.write_archive clobber: opts[:clobber]
+          modules = target.write_archive clobber: opts[:clobber]
+
+          manifest = {}
+          if opts[:gpgsign]
+            gpg = GPG.new(signer: opts[:gpgsigner])
+
+            modules.each do |mod|
+              manifest[mod] = gpg.sign(mod)
+            end
+          end
         rescue Exception => e
           @@logger.fatal e.message
           @@logger.debug e.backtrace.inspect
