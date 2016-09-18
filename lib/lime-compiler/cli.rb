@@ -43,7 +43,6 @@ module LimeCompiler
         end
 
         parser.on("--gpg-sign", "Sign compiled modules") do |v|
-          puts v
           @opts[:gpgsign] = v
         end
 
@@ -56,7 +55,13 @@ module LimeCompiler
           @opts[:verbose] = v
         end
 
-        parser.parse!
+        begin
+          parser.parse!
+        rescue Exception => e
+          puts e.message
+          puts parser
+          exit(1)
+        end
 
         if @opts[:verbose].nil?
           @opts[:verbose] = verbose
