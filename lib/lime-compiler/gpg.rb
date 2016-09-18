@@ -4,7 +4,7 @@ module LimeCompiler
   class GPG
 
     def initialize opts = {}
-      @signer = opts[:signer]
+      @signer = opts[:gpgid]
       @crypto = GPGME::Crypto.new
 
       @logger = Logger.new(STDOUT).tap do |log|
@@ -14,7 +14,7 @@ module LimeCompiler
     end
 
     def sign path
-      @logger.debug "signing #{path} as #{@signer} with TODO#KEYID"
+      @logger.debug "signing #{path} with #{@signer}"
       sigpath = "#{path}.sig"
       File.open(path, 'r') do |f|
         contents = f.read

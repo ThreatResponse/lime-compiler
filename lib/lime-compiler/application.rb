@@ -76,12 +76,12 @@ module LimeCompiler
           target.compile_lime
           modules = target.write_archive clobber: opts[:clobber]
 
-          manifest = {}
           if opts[:gpgsign]
             gpg = GPG.new(signer: opts[:gpgsigner])
 
             modules.each do |mod|
-              manifest[mod] = gpg.sign(mod)
+              sig_path = gpg.sign(mod)
+
             end
           end
         rescue Exception => e

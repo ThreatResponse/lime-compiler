@@ -46,9 +46,8 @@ module LimeCompiler
           @opts[:gpgsign] = v
         end
 
-        parser.on("--gpg-signer identity", "GPG id for module signing") do |v|
-          puts v
-          @opts[:gpgsigner] = v
+        parser.on("--gpg-id identity", "GPG id for module signing") do |v|
+          @opts[:gpgid] = v
         end
 
         parser.on("--[no-]verbose", "Run verbosely") do |v|
