@@ -14,6 +14,8 @@ module LimeCompiler
 
       @metadata_dir = "repodata"
       @module_dir = "modules"
+      @gpgsign = opts[:gpgsign]
+      @gpgnoverify = opts[:gpgnoverify]
       @packager = opts['packager']
       @platform = opts['platform']
 
@@ -148,6 +150,28 @@ module LimeCompiler
       repomd_path = "#{base.chomp("/")}/#{@metadata_dir}/repomd.xml"
       if File.file? repomd_path
         @logger.debug "found existing repomd.xml at #{repomd_path}"
+
+        # validate signature for repodata.xml
+        if @gpgsign and !@gpgnoverify
+          @logger.debug "checking gpg signature for #{repomd_path}"
+          repomd_sig_path = "#{repomd_path}.sig"
+
+          if File.file? repomd_sig_path
+            sig_pass = self.verify_signature repomd_path, repomd_sig_path
+          else
+            @logger.warn "repomd.xml signature not found, expected #{repomd_sig_path}, use the '--gpg-no-verify' flag to bypass check"
+            sig_pass = false
+          end
+
+          # on verification failure return from function
+          if sig_pass == false
+            @logger.warn "ignoring existing repomd.xml, signature verification failed for #{repomd_path}"
+            return
+          end
+
+        else
+          @logger.debug "gpg signing disabled, skipping check of repomd.xml signature"
+        end
 
         # expand base directory to fully qualified path
         base = File.expand_path(base).chomp("/")

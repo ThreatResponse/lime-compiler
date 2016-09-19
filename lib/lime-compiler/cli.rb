@@ -12,6 +12,7 @@ module LimeCompiler
         verbose = false
         gpgsign = false
         clobber = false
+        gpgnoverify = false
 
         parser = OptionParser.new
         parser.banner = "Usage: lime-compiler [options]"
@@ -50,6 +51,10 @@ module LimeCompiler
           @opts[:gpgid] = v
         end
 
+        parser.on("--gpg-no-verify", "Bypass gpg signature checks") do |v|
+          @opts[:gpgnoverify] = v
+        end
+
         parser.on("--[no-]verbose", "Run verbosely") do |v|
           @opts[:verbose] = v
         end
@@ -72,6 +77,10 @@ module LimeCompiler
 
         if @opts[:gpgsig].nil?
           @opts[:gpgsig] = gpgsign
+        end
+
+        if @opts[:gpgnoverify].nil?
+          @opts[:gpgnoverify] = gpgnoverify
         end
 
         if @opts[:config].nil? || @opts[:module_dir].nil? || @opts[:archive_dir].nil?

@@ -34,7 +34,10 @@ module LimeCompiler
       end
 
       client = LimeCompiler::DockerClient.new(config['docker']['url'])
-      repo = Repo.new(config['repository'])
+      repo_options = config['repository']
+      repo_options.merge!({gpgsign: opts[:gpgsign]})
+      repo_options.merge!({gpgnoverify: opts[:gpgnoverify]})
+      repo = Repo.new(repo_options)
       repo.setup_directories opts[:module_dir]
 
       config['images'].each do |name, image|
