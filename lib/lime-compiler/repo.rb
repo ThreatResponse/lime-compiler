@@ -1,3 +1,4 @@
+require 'active_support/core_ext/hash'
 require 'digest'
 require 'nokogiri'
 require 'zlib'
@@ -55,6 +56,9 @@ module LimeCompiler
     end
 
     def generate_repodata base
+      @logger.debug "checking for existing repomd.xml before overwrite"
+      self.check_repomd base
+
       primary_path = self.write_primary_metadata base
       primary_checksum = self.sha256 primary_path
 
@@ -136,6 +140,41 @@ module LimeCompiler
       @logger.debug "writting module metadata to #{primary_path}"
       File.open(primary_path, 'wb') { |file| file.write(primary.to_xml) }
       primary_path
+    end
+
+    def check_repomd base
+      repomd_path = "#{base.chomp("/")}/#{@metadata_dir}/repomd.xml"
+      if File.file? repomd_path
+        @logger.debug "found existing repomd.xml at #{repomd_path}"
+
+        # expand base directory to fully qualified path
+        base = File.expand_path(base).chomp("/")
+
+        repomd_xml = File.open(repomd_path, 'rb') { |f| Nokogiri::XML(f) }
+        repomd = Hash.from_xml(repomd_xml.to_s)
+        gzfile = "#{base}/#{repomd['metadata']['data']['location']['href']}"
+
+        primary = nil
+        @logger.debug "reading primary manifest #{gzfile}"
+        Zlib::GzipReader.open(gzfile) do |gz|
+          xml_string = gz.read
+          primary = Hash.from_xml(xml_string)
+        end
+
+        self.merge_repos base, primary['modules']['module']
+      end
+    end
+
+    def merge_repos base, modules
+      modules.each do |mod|
+        mod_path = "#{base.chomp("/")}/#{mod['location']['href']}"
+        if !@primary_metadata.key?(mod_path) and File.file?(mod_path)
+          @logger.debug "found #{mod_path} in existing primary.xml"
+          @logger.debug "injecting module metadata for #{mod_path}"
+          sig_path = "#{base}/#{mod['location']['href']}.sig"
+          self.generate_metadata mod_path, sig_path
+        end
+      end
     end
 
     def mod_name mod
