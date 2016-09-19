@@ -1,5 +1,6 @@
 require 'active_support/core_ext/hash'
 require 'digest'
+require 'gpgme'
 require 'nokogiri'
 require 'zlib'
 
@@ -9,6 +10,7 @@ module LimeCompiler
     def initialize opts = {}
       @primary_metadata = {}
       @repo_metadata = {}
+      @crypto = GPGME::Crypto.new
 
       @metadata_dir = "repodata"
       @module_dir = "modules"
@@ -170,9 +172,38 @@ module LimeCompiler
         mod_path = "#{base.chomp("/")}/#{mod['location']['href']}"
         if !@primary_metadata.key?(mod_path) and File.file?(mod_path)
           @logger.debug "found #{mod_path} in existing primary.xml"
-          @logger.debug "injecting module metadata for #{mod_path}"
-          sig_path = "#{base}/#{mod['location']['href']}.sig"
-          self.generate_metadata mod_path, sig_path
+
+          # verify module signature if present
+          if mod['signature']['href'] != ""
+            @logger.debug "verifying module signature #{mod_path}"
+            sig_path = "#{base}/#{mod['location']['href']}.sig"
+
+            if self.verify_signature mod_path, sig_path
+              sig_pass = true
+              sig_attempt_verify = true
+            else
+              sig_pass = false
+              sig_attempt_verify = true
+            end
+
+          else
+            sig_pass = true
+            sig_verify = false
+          end
+
+          # verify kernel module checksum
+          @logger.debug "verifying module checksum #{mod_path}"
+          checksum_pass = self.checksum_matches mod_path, mod['checksum']
+
+          # only insert module if verification passes
+          if sig_pass and checksum_pass
+            @logger.debug "injecting module metadata for #{mod_path}"
+            self.generate_metadata mod_path, sig_path
+          else
+            sig = sig_pass and sig_attempt_verify
+            msg = "signature valid: #{sig}, checksum valid: #{checksum_pass}"
+            @logger.info "module verification failed, #{msg} for #{mod_path}"
+          end
         end
       end
     end
@@ -192,6 +223,21 @@ module LimeCompiler
 
     def primary_metadata
       @primary_metadata
+    end
+
+    def verify_signature file, sig_file
+      sig = File.open(sig_file, 'r') {|f| f.read }
+      data = File.open(sig_file, 'r') {|f| f.read }
+      retval = nil
+      @crypto.verify(sig, signed_text: data) do |signature|
+        @logger.debug signature
+        retval = signature.valid?
+      end
+      retval
+    end
+
+    def checksum_matches file, checksum
+      checksum.eql?(self.sha256 file)
     end
 
   end
