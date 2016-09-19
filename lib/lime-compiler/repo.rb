@@ -156,14 +156,32 @@ module LimeCompiler
         repomd = Hash.from_xml(repomd_xml.to_s)
         gzfile = "#{base}/#{repomd['metadata']['data']['location']['href']}"
 
-        primary = nil
-        @logger.debug "reading primary manifest #{gzfile}"
-        Zlib::GzipReader.open(gzfile) do |gz|
-          xml_string = gz.read
-          primary = Hash.from_xml(xml_string)
-        end
+        # verify gzipped checksum
+        gz_checksum = repomd['metadata']['data']['checksum']
+        @logger.debug "verifying checksum: #{gzfile}"
+        if self.checksum_matches gzfile, gz_checksum
+          primary = nil
+          xml_string = nil
+          @logger.debug "reading primary manifest #{gzfile}"
+          Zlib::GzipReader.open(gzfile) do |gz|
+            xml_string = gz.read
+            primary = Hash.from_xml(xml_string)
+          end
 
-        self.merge_repos base, primary['modules']['module']
+          # verify open_checksum
+          @logger.debug "verifying decompressed data checksum: #{gzfile}"
+          open_checksum = repomd['metadata']['data']['open_checksum']
+          if self.checksum_matches xml_string, open_checksum, {is_file: false}
+            @logger.debug "verification complete, merging #{gzfile}"
+            self.merge_repos base, primary['modules']['module']
+          else
+            msg = "expected #{open_checksum} for #{gzfile}"
+            @logger.info "existing primary manifest open checksum mismatch, #{msg}"
+          end
+        else
+          msg = "expected #{gz_checksum} for #{gzfile}"
+          @logger.info "existing primary manifest checksum mismatch, #{msg}"
+        end
       end
     end
 
@@ -236,8 +254,17 @@ module LimeCompiler
       retval
     end
 
-    def checksum_matches file, checksum
-      checksum.eql?(self.sha256 file)
+    def checksum_matches data, checksum, opts = {is_file: true}
+      if opts[:is_file]
+        calculated = self.sha256 data
+        @logger.debug "calculated checksum #{calculated}"
+        result = checksum.eql?(calculated)
+      else
+        calculated = Digest::SHA256.hexdigest data
+        @logger.debug "calculated checksum #{calculated}"
+        result = checksum.eql?(calculated)
+      end
+      result
     end
 
   end
