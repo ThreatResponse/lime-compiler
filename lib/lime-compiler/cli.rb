@@ -13,18 +13,22 @@ module LimeCompiler
         gpgsign = false
         clobber = false
         gpgnoverify = false
+        quit = false
+        error = false
 
         parser = OptionParser.new
         parser.banner = "Usage: lime-compiler [options]"
 
         parser.on("-h", "--help", "Show this help message") do ||
           puts parser
-          exit(0)
+          quit = true
         end
 
         parser.on("-v", "--version", "Print gem version") do ||
-          puts LimeCompiler::VERSION
-          exit(0)
+          unless quit
+            puts LimeCompiler::VERSION
+            quit = true
+          end
         end
 
         parser.on("-c", "--config config.yml", "[Required] path to config file") do |v|
@@ -84,12 +88,17 @@ module LimeCompiler
         end
 
         if @opts[:config].nil? || @opts[:module_dir].nil? || @opts[:archive_dir].nil?
-          puts parser
-          exit(1)
+          unless quit
+            puts parser
+            quit = true
+          end
         end
 
       end
 
+      if quit == true
+        exit(1)
+      end
       @opts
 
     end
