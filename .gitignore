@@ -2,5 +2,7 @@
 Gemfile.lock
 archive/*.tar
 modules/*
-!modules/.keep
+build/*
+!build/.keep
 *.gem
+tmp/*
