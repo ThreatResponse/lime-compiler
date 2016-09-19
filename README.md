@@ -14,10 +14,16 @@ Builds LiME Kernel modules for:
 
     Usage: lime-compiler [options]
         -h, --help                       Show this help message
+        -v, --version                    Print gem version
         -c, --config config.yml          [Required] path to config file
         -m, --moduledir modules/         [Required] module output directory
         -a, --archive archive/           [Required] archive output directory
-        -v, --[no-]verbose               Run verbosely
+            --clobber                    Overwrite existing files in the module output directory
+            --gpg-sign                   Sign compiled modules
+            --gpg-id identity            GPG id for module signing
+            --gpg-no-verify              Bypass gpg signature checks
+            --[no-]verbose               Run verbosely
+
 
 You can run straight from the repository, using the provided archive and modules directories
 
@@ -30,7 +36,7 @@ Ensure docker is installed and the user running `lime-compiler` can write to the
 Install from github:  
 
     gem install specific_install
-    gem specific_install -l https://github.com/ThreatResponse/ruby-lime-compiler-private.git
+    gem specific_install -l https://github.com/ThreatResponse/lime-compiler.git
 
 Build and install locally:  
 
@@ -40,13 +46,36 @@ Build and install locally:
 Gem installation places `lime-compiler` in the systems path
 
 
+## Example
+
+To generate kernel modules without gpg signatures and the provided configuration files see the following command.
+
+    $ # ensure that the build and archive directories exist
+    $ mkdir build archive
+    $ lime-compiler --config conf/config.yml -m build/ -a archive/ --gpg-no-verify
+
+## Build Output
+
+    Below is a truncated example of a build, note that files ending in .sig are only generate if the `--gpg-sign` flag is used in conjunction with `--gpg-id`.
+
+    $ tree build/
+    build/
+    ├── modules
+    │   ├── lime-4.4.0-21-generic.ko
+    │   ├── lime-4.4.0-21-generic.ko.sig
+    │   ├── lime-4.4.0-22-generic.ko
+    │   └── lime-4.4.0-22-generic.ko.sig
+    └── repodata
+        ├── c5bff3ea30873b1dedd1aa333df23df9f0920be8cb4e515766e5ff3bd083633d-primary.xml.gz
+        ├── repomd.xml
+        └── repomd.xml.sig
+
+
 ## TODO:
 
 - support uploading to s3
 - test suite
 - document config structure
-- parallel builds?
-- sign kernel modules
 
 ## License
 
