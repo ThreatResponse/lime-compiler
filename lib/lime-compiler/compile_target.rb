@@ -66,11 +66,13 @@ module LimeCompiler
       @packages = kernel_packages(resp[0])
       @logger.debug @packages
 
-      # TODO: move to individual install commands to avoid exec timeouts?
       @packages = @packages.map {|val| "#{@prefix}#{val}"}
-      command = [@distro['packager'], 'install', '-y'] + @packages
-      resp = @container.exec(command, tty: true)
-      @logger.debug resp
+      @packages.each do |package|
+        command = [@distro['packager'], 'install', '-y', package]
+        @logger.debug "running #{command}"
+        resp = @container.exec(command, tty: true)
+        @logger.debug resp
+      end
     end
 
     def compile_lime
