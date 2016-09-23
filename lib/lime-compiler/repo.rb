@@ -47,7 +47,11 @@ module LimeCompiler
       metadata = {}
 
       module_name = mod_path.split("/")[-1]
-      signature_name = sig_path.split("/")[-1]
+      if sig_path.nil?
+        signature_path = ""
+      else
+        signature_path = "#{@module_dir}/#{sig_path.split("/")[-1]}"
+      end
 
       metadata[:name]      = module_name
       metadata[:arch]      = "x86_64" # TODO: make this dynamic
@@ -55,7 +59,7 @@ module LimeCompiler
       metadata[:version]   = self.mod_name module_name
       metadata[:packager]  = @packager
       metadata[:location]  = "#{@module_dir}/#{module_name}"
-      metadata[:signature] = "#{@module_dir}/#{signature_name}"
+      metadata[:signature] = signature_path
       metadata[:platform]  = @platform
 
       @logger.debug "generated metadata #{metadata} for #{mod_path}"

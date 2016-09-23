@@ -89,7 +89,11 @@ module LimeCompiler
 
             modules.each do |mod|
               sig_path = gpg.sign(mod)
-
+              repo.generate_metadata mod, sig_path
+            end
+          else
+            sig_path = nil
+            modules.each do |mod|
               repo.generate_metadata mod, sig_path
             end
           end
