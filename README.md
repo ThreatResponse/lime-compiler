@@ -56,7 +56,7 @@ To generate kernel modules without gpg signatures and the provided configuration
 
 ## Build Output
 
-    Below is a truncated example of a build, note that files ending in .sig are only generate if the `--gpg-sign` flag is used in conjunction with `--gpg-id`.
+Below is a truncated example of a build, note that files ending in .sig are only generate if the `--gpg-sign` flag is used in conjunction with `--gpg-id`.
 
     $ tree build/
     build/
@@ -70,6 +70,65 @@ To generate kernel modules without gpg signatures and the provided configuration
         ├── repomd.xml
         └── repomd.xml.sig
 
+
+## Docker Custimization
+
+Docker's default disk size of 10 Gb is to small for installing all the required kernel headers for some older distributions.
+
+The default disk size can be expanded by reconfiguring the docker daemon.  These instructions are lifted from the offical [docker docs](https://docs.docker.com/engine/admin/systemd/)
+
+need to expand base images size beyond 20gb
+
+### SystemD
+
+Create a directory to hold partial unit files
+
+```
+$ mkdir -p /etc/systemd/system/docker.service.d
+```
+
+Create a partial unit file with the name `10-docker-environment.conf` in the `docker.service.d` directory.
+
+```
+$ cat /etc/systemd/system/docker.service.d/10-docker-environment.conf
+[Service]
+EnvironmentFile=-/etc/sysconfig/docker
+EnvironmentFile=-/etc/sysconfig/docker-storage
+EnvironmentFile=-/etc/sysconfig/docker-network
+
+ExecStart=
+ExecStart=/usr/bin/dockerd $OPTIONS \
+$DOCKER_STORAGE_OPTIONS \
+$DOCKER_NETWORK_OPTIONS \
+$BLOCK_REGISTRY \
+$INSECURE_REGISTRY
+
+```
+
+Create the files referenced in the `EnvironmentFile` directives.
+
+```
+$ touch /etc/sysconfig/docker
+$ echo "DOCKER_STORAGE_OPTIONS= --storage-opt dm.basesize=20G" > /etc/sysconfig/docker-storage
+$ touch /etc/sysconfig/docker-networking
+```
+
+Reload the docker service and restart the docker daemon
+
+```
+$ systemctl stop docker
+$ systemctl daemon-reload
+$ systemctl start docker
+```
+
+Verify the `Base Device Size` has been increased.
+
+```
+$ docker info | grep "Base Device Size"
+  Base Device Size: 21.47 GB
+```
+
+Containers and their base images will have to be deleted for the new disk sizes to take affect
 
 ## TODO:
 
