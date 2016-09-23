@@ -132,22 +132,25 @@ module LimeCompiler
     def kernel_packages(output)
       packages = []
 
-      match = @distro['kernel_package_match']
+      pattern = Regexp.new(@distro['kernel_package_match'])
       match_position = @distro['match_position']
       package_position = @distro['kernel_position']
-      output.each do |line|
-        line = line.gsub(/\x0A/, '').strip.chomp
-        tokens = line.split(" ")
-        if tokens[match_position].include? match
-          package = tokens[package_position]
-          packages << package
-          @logger.debug "matched kernel: #{package}"
-        else
-          @logger.debug "match failed #{tokens[match_position]} for #{match}"
+      output.each do |text|
+        # some blocks of text contain multiple lines
+        text.split("\r\n").each do |line|
+          line = line.gsub("\r\n", '').strip.chomp
+          tokens = line.split(" ")
+          if tokens[match_position] =~ pattern
+            package = tokens[package_position]
+            packages << package
+            @logger.debug "matched kernel: #{package}"
+          else
+            @logger.debug "match failed #{tokens[match_position]} for #{pattern}"
+          end
         end
       end
 
-      packages
+      packages.sort
     end
 
     def kernel_modules(output)
@@ -159,7 +162,7 @@ module LimeCompiler
           modules << token
         end
       end
-      modules
+      modules.sort
     end
 
   end

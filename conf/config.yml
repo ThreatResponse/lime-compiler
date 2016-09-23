@@ -10,7 +10,7 @@ distributions:
   amzn:
     packager: 'sudo yum'
     kernel_packages: 'sudo yum --showduplicates list kernel-devel'
-    kernel_package_match: 'kernel-devel.x86_64'
+    kernel_package_match: 'kernel\-devel\.x86_64'
     match_position: 0
     kernel_position: 1
     kernel_package_prefix: 'kernel-devel-'
@@ -22,7 +22,7 @@ distributions:
   centos:
     packager: '/usr/bin/yum'
     kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
-    kernel_package_match: 'kernel-devel.x86_64'
+    kernel_package_match: 'kernel\-devel\.x86_64'
     match_position: 0
     kernel_position: 1
     kernel_package_prefix: 'kernel-devel-'
@@ -36,7 +36,7 @@ distributions:
   ubuntu:
     packager: '/usr/bin/apt-get'
     kernel_packages: '/usr/bin/apt-cache search linux-headers-.*-generic$'
-    kernel_package_match: 'linux-headers-'
+    kernel_package_match: '^linux\-headers\-.*\-generic$'
     match_position: 0
     kernel_position: 0
     kernel_source_postfix: '/build'
@@ -49,7 +49,7 @@ distributions:
   debian:
     packager: '/usr/bin/apt-get'
     kernel_packages: '/usr/bin/apt-cache search linux-headers-*'
-    kernel_package_match: 'linux-headers-'
+    kernel_package_match: '^linux\-headers\-.*\-generic$'
     match_position: 0
     kernel_position: 0
     kernel_source_postfix: '/build'
