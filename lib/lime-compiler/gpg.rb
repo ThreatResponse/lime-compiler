@@ -10,6 +10,9 @@ module LimeCompiler
       @logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler.gpg'
       end
+      @logger.formatter= proc do |severity, datetime, progname, msg|
+        "#{datetime.strftime("%Y-%m-%dT%H:%M:%S%:z")} - #{progname} - #{severity} - #{msg}\n"
+      end
       @logger.level = Application.log_level
     end
 
