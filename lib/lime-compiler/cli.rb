@@ -80,7 +80,7 @@ module LimeCompiler
         end
 
         if @opts[:gpgsig].nil?
-          @opts[:gpgsig] = gpgsign
+          @opts[:gpgsign] = gpgsign
         end
 
         if @opts[:gpgnoverify].nil?
