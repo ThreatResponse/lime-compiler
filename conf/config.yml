@@ -41,6 +41,22 @@ distributions:
       - 'gcc'
     pre_actions:
       - "/bin/sed -i s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-Vault.repo"
+  amzn1:
+    packager: '/usr/bin/yum'
+    packager_args:
+      - '-y'
+      - '-d1'
+    check_package: '/usr/bin/rpm -q '
+    kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
+    kernel_package_match: 'kernel\-devel\.x86_64'
+    match_position: 0
+    kernel_position: 1
+    kernel_package_prefix: 'kernel-devel-'
+    source_dir: '/usr/src/kernels'
+    dependencies:
+      - 'git'
+      - 'make'
+      - 'gcc'
   ubuntu:
     packager: '/usr/bin/apt-get'
     packager_args:
@@ -75,8 +91,8 @@ distributions:
 
 images:
   amzn:
-    image: "local"
-    tag: "local"
+    image: "amazonlinux"
+    tag: "latest"
     distribution: 'amzn'
   debian7:
     image: "debian"
@@ -109,4 +125,8 @@ images:
   ubuntu-16.04:
     image: "ubuntu"
     tag: "16.04"
+    distribution: "ubuntu"
+  ubuntu-16.10:
+    image: "ubuntu"
+    tag: "16.10"
     distribution: "ubuntu"
