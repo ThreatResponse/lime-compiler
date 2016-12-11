@@ -81,7 +81,19 @@ module LimeCompiler
     end
 
     def package_installed package
-      return false
+      chk_package = @distro[:check_package]
+      @logger.debug "#{chk_package}"
+      command =  chk_package[0, chk_package.length-1] + [chk_package.last + package]
+      @logger.debug "running #{command}"
+      resp = @container.exec(command, tty: true)
+      @logger.debug resp
+      if resp.last.zero?
+        @logger.debug "#{package} already installed"
+        return true
+      else
+        @logger.debug "#{package} not installed"
+        return false
+      end
     end
 
     def compile_lime
