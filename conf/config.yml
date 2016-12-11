@@ -8,8 +8,12 @@ repository:
 
 distributions:
   amzn:
-    packager: 'sudo yum'
-    kernel_packages: 'sudo yum --showduplicates list kernel-devel'
+    packager: '/usr/bin/yum'
+    packager_args:
+      - '-y'
+      - '-d1'
+    check_package: '/bin/rpm -qa | grep'
+    kernel_packages: 'yum --showduplicates list kernel-devel'
     kernel_package_match: 'kernel\-devel\.x86_64'
     match_position: 0
     kernel_position: 1
@@ -21,6 +25,10 @@ distributions:
       - 'gcc'
   centos:
     packager: '/usr/bin/yum'
+    packager_args:
+      - '-y'
+      - '-d1'
+    check_package: '/usr/bin/rpm -q '
     kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
     kernel_package_match: 'kernel\-devel\.x86_64'
     match_position: 0
@@ -35,6 +43,9 @@ distributions:
       - "/bin/sed -i s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-Vault.repo"
   ubuntu:
     packager: '/usr/bin/apt-get'
+    packager_args:
+      - '-y'
+    package_installed: '/usr/bin/dpkg'
     kernel_packages: '/usr/bin/apt-cache search linux-headers-.*-generic$'
     kernel_package_match: '^linux\-headers\-.*\-generic$'
     match_position: 0
@@ -48,6 +59,8 @@ distributions:
       - 'dpkg-dev'
   debian:
     packager: '/usr/bin/apt-get'
+    packager_args:
+      - '-y'
     kernel_packages: '/usr/bin/apt-cache search linux-headers-*'
     kernel_package_match: '^linux\-headers\-.*\-generic$'
     match_position: 0

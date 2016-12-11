@@ -9,9 +9,9 @@ module LimeCompiler
       @distro = opts[:distro]
       @container = opts[:container]
       @packages = nil
-      @prefix = @distro['kernel_package_prefix'] ||= ''
-      @source_dir = @distro['source_dir']
-      @source_postfix = @distro['kernel_source_postfix'] ||= ''
+      @prefix = @distro[:kernel_package_prefix] ||= ''
+      @source_dir = @distro[:source_dir]
+      @source_postfix = @distro[:kernel_source_postfix] ||= ''
       @archive_dir = opts[:archive_dir]
       @archive_name = "#{opts[:archive_name]}.tar"
       @module_dir = opts[:module_dir]
@@ -26,9 +26,9 @@ module LimeCompiler
     end
 
     def pre_actions
-      unless @distro['pre_actions'].nil?
+      unless @distro[:pre_actions].nil?
         @logger.info "running pre actions for #{@name}"
-        @distro['pre_actions'].each do |action|
+        @distro[:pre_actions].each do |action|
           resp = @container.exec(action.split(" "), tty: true)
           @logger.debug resp[0]
         end
@@ -37,13 +37,13 @@ module LimeCompiler
 
     def update_sources
       @logger.info "updating sources for #{@name}"
-      resp = @container.exec([@distro['packager'], 'update', '-y'] , tty: true)
+      resp = @container.exec([@distro[:packager], 'update'] + @distro[:packager_args], tty: true)
       @logger.debug resp
     end
 
     def install_dependencies
       @logger.info "installing dependecies for #{@name}"
-      command = [@distro['packager'], 'install', '-y'] + @distro['dependencies']
+      command = [@distro[:packager], 'install'] + @distro[:packager_args] + @distro[:dependencies]
       resp = @container.exec(command, tty: true)
       @logger.debug resp
     end
@@ -64,18 +64,24 @@ module LimeCompiler
 
     def install_headers
       @logger.info "installing kernel headers for #{@name}"
-      resp = @container.exec(@distro['kernel_packages'].split(" "), tty: true)
+      resp = @container.exec(@distro[:kernel_packages].split(" "), tty: true)
       @logger.debug resp
       @packages = kernel_packages(resp[0])
       @logger.debug @packages
 
       @packages = @packages.map {|val| "#{@prefix}#{val}"}
       @packages.each do |package|
-        command = [@distro['packager'], 'install', '-y', package]
-        @logger.debug "running #{command}"
-        resp = @container.exec(command, tty: true)
-        @logger.debug resp
+        unless package_installed package
+          command = [@distro[:packager], 'install'] + @distro[:packager_args] + [package]
+          @logger.debug "running #{command}"
+          resp = @container.exec(command, tty: true)
+          @logger.debug resp
+        end
       end
+    end
+
+    def package_installed package
+      return false
     end
 
     def compile_lime
@@ -132,9 +138,9 @@ module LimeCompiler
     def kernel_packages(output)
       packages = []
 
-      pattern = Regexp.new(@distro['kernel_package_match'])
-      match_position = @distro['match_position']
-      package_position = @distro['kernel_position']
+      pattern = Regexp.new(@distro[:kernel_package_match])
+      match_position = @distro[:match_position]
+      package_position = @distro[:kernel_position]
       output.each do |text|
         # some blocks of text contain multiple lines
         text.split("\r\n").each do |line|

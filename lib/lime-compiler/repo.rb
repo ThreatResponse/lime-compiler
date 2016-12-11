@@ -16,8 +16,8 @@ module LimeCompiler
       @module_dir = "modules"
       @gpgsign = opts[:gpgsign]
       @gpgnoverify = opts[:gpgnoverify]
-      @packager = opts['packager']
-      @platform = opts['platform']
+      @packager = opts[:packager]
+      @platform = opts[:platform]
 
       @logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler.repo'

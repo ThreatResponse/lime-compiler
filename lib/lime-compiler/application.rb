@@ -30,43 +30,44 @@ module LimeCompiler
         @@logger.debug "validating options #{opts}"
         cli.validate opts
         config = YAML::load_file(opts[:config])
+        config = self.symbolize config
       rescue Exception => e
         @@logger.fatal e.message
         @@logger.debug e.backtrace.inspect
         exit(1)
       end
 
-      client = LimeCompiler::DockerClient.new(config['docker']['url'])
-      repo_options = config['repository']
+      client = LimeCompiler::DockerClient.new(config[:docker][:url])
+      repo_options = config[:repository]
       repo_options.merge!({gpgsign: opts[:gpgsign]})
       repo_options.merge!({gpgnoverify: opts[:gpgnoverify]})
       repo = Repo.new(repo_options)
       repo.setup_directories opts[:module_dir]
 
-      config['images'].each do |name, image|
-        unless image['image'] == 'local'
-          @@logger.info "pulling latest for #{image['image']}:#{image['tag']}"
-          client.pull(image['image'], image['tag'])
+      config[:images].each do |name, image|
+        unless image[:image] == 'local'
+          @@logger.info "pulling latest for #{image[:image]}:#{image[:tag]}"
+          client.pull(image[:image], image[:tag])
         end
       end
 
-      config['images'].each do |name, image|
+      config[:images].each do |name, image|
 
-        if image['image'] == 'local'
+        if image[:image] == 'local'
           local_run = true
         else
           local_run = false
         end
 
-        container_name = "lime_build_#{image['image']}_#{image['tag']}"
-        distro_name = image['distribution']
-        distro = config['distributions'][distro_name]
+        container_name = "lime_build_#{image[:image]}_#{image[:tag]}"
+        distro_name = image[:distribution]
+        distro = config[:distributions][distro_name.to_sym]
 
         if local_run
           c = LocalSystem.new
         else
-          @@logger.info "creating container #{container_name} from #{image['image']}:#{image['tag']}"
-          c = client.container(container_name, image['image'], image['tag'],
+          @@logger.info "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
+          c = client.container(container_name, image[:image], image[:tag],
                                'start': true, 'reuse': true)
         end
 
@@ -110,6 +111,18 @@ module LimeCompiler
 
       client.cleanup_containers(delete: false)
 
+    end
+
+    def symbolize config
+      Hash[ config.map do |k,v|
+        ret = nil
+        if v.is_a?(Hash)
+          ret = [k.to_sym, symbolize(v)]
+        else
+          ret = [k.to_sym, v]
+        end
+        ret
+      end ]
     end
 
     def self.log_level
