@@ -15,6 +15,7 @@ module LimeCompiler
       @archive_dir = opts[:archive_dir]
       @archive_name = "#{opts[:archive_name]}.tar"
       @module_dir = opts[:module_dir]
+      @arch = @container.exec(['/bin/arch'])[0][0].strip
 
       @logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler.compile-target'
@@ -62,7 +63,7 @@ module LimeCompiler
       @logger.debug resp
     end
 
-    def install_headers
+    def compile_lime
       @logger.info "installing kernel headers for #{@name}"
       resp = @container.exec(@distro[:kernel_packages].split(" "), tty: true)
       @logger.debug resp
@@ -77,12 +78,18 @@ module LimeCompiler
           resp = @container.exec(command, tty: true)
           @logger.debug resp
         end
+
+        if @distro[:source_include_arch?]
+          kernel = "#{package[@distro[:source_strip].length, package.length]}.#{@arch}"
+        else
+          kernel = "#{package[@distro[:source_strip].length, package.length]}"
+        end
+        compile_for kernel
       end
     end
 
     def package_installed package
       chk_package = @distro[:check_package]
-      @logger.debug "#{chk_package}"
       command =  chk_package[0, chk_package.length-1] + [chk_package.last + package]
       @logger.debug "running #{command}"
       resp = @container.exec(command, tty: true)
@@ -96,22 +103,14 @@ module LimeCompiler
       end
     end
 
-    def compile_lime
-      resp = @container.exec(['ls', @source_dir], tty: true)
-
-      kernels = kernel_modules(resp[0])
-      @logger.debug "kernels sources found #{kernels}"
-
-      @logger.info "compiling kernel sources"
-      kernels.each do |kernel|
-        @logger.debug "module: #{kernel}"
-        command = "make -C #{@source_dir}/#{kernel}#{@source_postfix} M=/tmp/LiME/src"
-        resp = @container.exec(command.split(" "), tty: true)
-        @logger.debug resp
-        command = "mv /tmp/LiME/src/lime.ko /tmp/modules/lime-#{kernel}.ko"
-        resp = @container.exec(command.split(" "), tty: true)
-        @logger.debug resp
-      end
+    def compile_for kernel
+      @logger.debug "compiling lime for #{kernel}"
+      command = "make -C #{@source_dir}/#{kernel}#{@source_postfix} M=/tmp/LiME/src"
+      resp = @container.exec(command.split(" "), tty: true)
+      @logger.debug resp
+      command = "mv /tmp/LiME/src/lime.ko /tmp/modules/lime-#{kernel}.ko"
+      resp = @container.exec(command.split(" "), tty: true)
+      @logger.debug resp
     end
 
     def write_archive clobber: false
@@ -168,19 +167,7 @@ module LimeCompiler
         end
       end
 
-      packages.sort
-    end
-
-    def kernel_modules(output)
-      modules = []
-      output.each do |line|
-        line = line.gsub(/\x0A/, '').strip.chomp
-        tokens = line.split(" ")
-        tokens.each do |token|
-          modules << token
-        end
-      end
-      modules.sort
+      packages.sort.uniq
     end
 
   end

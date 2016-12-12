@@ -19,6 +19,8 @@ distributions:
     kernel_position: 1
     kernel_package_prefix: 'kernel-devel-'
     source_dir: '/usr/src/kernels'
+    source_include_arch?: true
+    source_strip: 'kernel-devel-'
     dependencies:
       - 'git'
       - 'make'
@@ -68,6 +70,8 @@ distributions:
     kernel_position: 0
     kernel_source_postfix: '/build'
     source_dir: '/lib/modules'
+    source_include_arch?: false
+    source_strip: 'linux-headers-'
     dependencies:
       - 'git'
       - 'make'
@@ -84,6 +88,8 @@ distributions:
     kernel_position: 0
     kernel_source_postfix: '/build'
     source_dir: '/lib/modules'
+    source_include_arch?: false
+    source_strip: 'linux-headers-'
     dependencies:
       - 'git'
       - 'make'
