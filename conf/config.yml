@@ -7,7 +7,7 @@ repository:
   platform: "linux"
 
 distributions:
-  amzn:
+  amzn1:
     packager: '/usr/bin/yum'
     packager_args:
       - '-y'
@@ -37,28 +37,14 @@ distributions:
     kernel_position: 1
     kernel_package_prefix: 'kernel-devel-'
     source_dir: '/usr/src/kernels'
+    source_include_arch?: true
+    source_strip: 'kernel-devel-'
     dependencies:
       - 'git'
       - 'make'
       - 'gcc'
     pre_actions:
       - "/bin/sed -i s/enabled=0/enabled=1/g /etc/yum.repos.d/CentOS-Vault.repo"
-  amzn1:
-    packager: '/usr/bin/yum'
-    packager_args:
-      - '-y'
-      - '-d1'
-    check_package: '/usr/bin/rpm -q '
-    kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
-    kernel_package_match: 'kernel\-devel\.x86_64'
-    match_position: 0
-    kernel_position: 1
-    kernel_package_prefix: 'kernel-devel-'
-    source_dir: '/usr/src/kernels'
-    dependencies:
-      - 'git'
-      - 'make'
-      - 'gcc'
   ubuntu:
     packager: '/usr/bin/apt-get'
     packager_args:
