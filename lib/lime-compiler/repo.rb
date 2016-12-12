@@ -42,6 +42,11 @@ module LimeCompiler
       end
     end
 
+    def modules path
+      module_path = "#{path.chomp("/")}/#{@module_dir}"
+      Dir["#{module_path.chomp("/")}/*.ko"].map {|val| File.basename val}
+    end
+
     def generate_metadata mod_path, sig_path
 
       metadata = {}

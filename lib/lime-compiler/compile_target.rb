@@ -15,6 +15,8 @@ module LimeCompiler
       @archive_dir = opts[:archive_dir]
       @archive_name = "#{opts[:archive_name]}.tar"
       @module_dir = opts[:module_dir]
+      @existing_modules = opts[:existing_modules]
+      @build_all = opts[:build_all]
       @arch = @container.exec(['/bin/arch'])[0][0].strip
 
       @logger = Logger.new(STDOUT).tap do |log|
@@ -72,23 +74,27 @@ module LimeCompiler
 
       @packages = @packages.map {|val| "#{@prefix}#{val}"}
       @packages.each do |package|
-        unless package_installed package
-          command = [@distro[:packager], 'install'] + @distro[:packager_args] + [package]
-          @logger.debug "running #{command}"
-          resp = @container.exec(command, tty: true)
-          @logger.debug resp
-        end
-
         if @distro[:source_include_arch?]
           kernel = "#{package[@distro[:source_strip].length, package.length]}.#{@arch}"
         else
           kernel = "#{package[@distro[:source_strip].length, package.length]}"
         end
-        compile_for kernel
+
+        if not module_built? kernel and @build_all == false
+          unless package_installed? package
+            command = [@distro[:packager], 'install'] + @distro[:packager_args] + [package]
+            @logger.debug "running #{command}"
+            resp = @container.exec(command, tty: true)
+            @logger.debug resp
+          end
+          compile_for kernel
+        else
+          @logger.debug "skipping module for kernel #{kernel}, module already built"
+        end
       end
     end
 
-    def package_installed package
+    def package_installed? package
       chk_package = @distro[:check_package]
       command =  chk_package[0, chk_package.length-1] + [chk_package.last + package]
       @logger.debug "running #{command}"
@@ -101,6 +107,11 @@ module LimeCompiler
         @logger.debug "#{package} not installed"
         return false
       end
+    end
+
+    def module_built? kernel
+      @logger.debug("checking if kernel already built: #{kernel}")
+      @existing_modules.include? "lime-#{kernel}.ko"
     end
 
     def compile_for kernel

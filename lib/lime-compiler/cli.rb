@@ -10,6 +10,7 @@ module LimeCompiler
     def options
       if @opts.empty?
         verbose = false
+        build_all = false
         gpgsign = false
         clobber = false
         gpgnoverify = false
@@ -43,6 +44,10 @@ module LimeCompiler
           @opts[:archive_dir] = v
         end
 
+        parser.on("--build-all", "Rebuild existing lime modules in the build root") do |v|
+          @opts[:build_all] = v
+        end
+
         parser.on("--clobber", "Overwrite existing files in the module output directory") do |v|
           @opts[:clobber] = v
         end
@@ -73,6 +78,10 @@ module LimeCompiler
 
         if @opts[:verbose].nil?
           @opts[:verbose] = verbose
+        end
+
+        if @opts[:buildall].nil?
+          @opts[:build_all] = build_all
         end
 
         if @opts[:clobber].nil?

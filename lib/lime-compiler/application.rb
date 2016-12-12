@@ -42,6 +42,8 @@ module LimeCompiler
       repo_options.merge!({gpgnoverify: opts[:gpgnoverify]})
       repo = Repo.new(repo_options)
       repo.setup_directories opts[:module_dir]
+      existing_modules = repo.modules opts[:module_dir]
+      @@logger.debug "existing modules found: #{existing_modules}"
 
       config[:images].each do |name, image|
         @@logger.info "pulling latest for #{image[:image]}:#{image[:tag]}"
@@ -61,14 +63,15 @@ module LimeCompiler
         target = CompileTarget.new(name: container_name, archive_name: name,
                                    archive_dir: opts[:archive_dir],
                                    module_dir: "#{opts[:module_dir]}/modules",
-                                   distro: distro, container: c)
+                                   distro: distro, container: c,
+                                   existing_modules: existing_modules,
+                                   build_all: opts[:build_all])
         begin
           target.pre_actions
           target.update_sources
           target.install_dependencies
           target.clone_lime
           target.create_directories
-          target.install_headers
           target.compile_lime
           modules = target.write_archive clobber: opts[:clobber]
 
