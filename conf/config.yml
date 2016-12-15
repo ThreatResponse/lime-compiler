@@ -48,6 +48,7 @@ distributions:
   ubuntu:
     packager: '/usr/bin/apt-get'
     packager_args:
+      - '-q'
       - '-y'
     check_package: ['/usr/bin/dpkg', '-s', '']
     kernel_packages: '/usr/bin/apt-cache search linux-headers-.*-generic$'
@@ -66,10 +67,11 @@ distributions:
   debian:
     packager: '/usr/bin/apt-get'
     packager_args:
+      - '-q'
       - '-y'
     check_package: ['/usr/bin/dpkg', '-s', '']
     kernel_packages: '/usr/bin/apt-cache search linux-headers-*'
-    kernel_package_match: '^linux\-headers\-.*\-generic$'
+    kernel_package_match: '^linux\-headers\-.*(?<!all)\-amd64$'
     match_position: 0
     kernel_position: 0
     kernel_source_postfix: '/build'
