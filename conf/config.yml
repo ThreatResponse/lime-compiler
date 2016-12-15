@@ -85,10 +85,10 @@ distributions:
       - 'dpkg-dev'
 
 images:
-  amzn:
+  amzn1:
     image: "amazonlinux"
     tag: "latest"
-    distribution: 'amzn'
+    distribution: 'amzn1'
   debian7:
     image: "debian"
     tag: "7"
