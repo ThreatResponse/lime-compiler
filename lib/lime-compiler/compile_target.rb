@@ -80,7 +80,7 @@ module LimeCompiler
           kernel = "#{package[@distro[:source_strip].length, package.length]}"
         end
 
-        if not module_built? kernel and @build_all == false
+        if not module_built? kernel or @build_all
           unless package_installed? package
             command = [@distro[:packager], 'install'] + @distro[:packager_args] + [package]
             @logger.debug "running #{command}"

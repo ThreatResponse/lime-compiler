@@ -80,7 +80,7 @@ module LimeCompiler
           @opts[:verbose] = verbose
         end
 
-        if @opts[:buildall].nil?
+        if @opts[:build_all].nil?
           @opts[:build_all] = build_all
         end
 
