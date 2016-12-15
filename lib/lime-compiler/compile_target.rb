@@ -53,7 +53,10 @@ module LimeCompiler
 
     def clone_lime
       @logger.info "cloning LiME to /tmp/LiME for #{@name}"
-      command = "git clone https://github.com/504ensicsLabs/LiME.git /tmp/LiME".split(" ")
+      resp = @container.exec("rm -rf /tmp/LiME".split(" ") , tty: true)
+      @logger.debug resp
+
+      command = "git clone --quiet https://github.com/504ensicsLabs/LiME.git /tmp/LiME".split(" ")
       resp = @container.exec(command , tty: true)
       @logger.debug resp
     end
