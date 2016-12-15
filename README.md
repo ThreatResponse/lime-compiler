@@ -14,17 +14,19 @@ Builds LiME Kernel modules for:
 
 ## Usage
 
-    Usage: lime-compiler [options]
-        -h, --help                       Show this help message
-        -v, --version                    Print gem version
-        -c, --config config.yml          [Required] path to config file
-        -m, --moduledir modules/         [Required] module output directory
-        -a, --archive archive/           [Required] archive output directory
-            --clobber                    Overwrite existing files in the module output directory
-            --gpg-sign                   Sign compiled modules
-            --gpg-id identity            GPG id for module signing
-            --gpg-no-verify              Bypass gpg signature checks
-            --[no-]verbose               Run verbosely
+Usage: lime-compiler [options]
+    -h, --help                       Show this help message
+    -v, --version                    Print gem version
+    -c, --config config.yml          [Required] path to config file
+    -m, --moduledir modules/         [Required] module output directory
+    -a, --archive archive/           [Required] archive output directory
+        --build-all                  Rebuild existing lime modules in the build root
+        --clobber                    Overwrite existing files in the module output directory
+        --gpg-sign                   Sign compiled modules
+        --gpg-id identity            GPG id for module signing
+        --gpg-no-verify              Bypass gpg signature checks
+        --[no-]verbose               Run verbosely
+
 
 
 You can run straight from the repository, using the provided archive and modules directories
