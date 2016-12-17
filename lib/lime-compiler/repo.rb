@@ -219,6 +219,11 @@ module LimeCompiler
           msg = "expected #{gz_checksum} for #{gzfile}"
           @logger.info "existing primary manifest checksum mismatch, #{msg}"
         end
+
+        if File.file? gzfile
+          @logger.debug "cleaning up old primary.xml #{gzfile}"
+          File.delete(gzfile)
+        end
       end
     end
 
