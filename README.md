@@ -14,6 +14,7 @@ Builds LiME Kernel modules for:
 
 ## Usage
 
+```
 Usage: lime-compiler [options]
     -h, --help                       Show this help message
     -v, --version                    Print gem version
@@ -26,7 +27,7 @@ Usage: lime-compiler [options]
         --gpg-id identity            GPG id for module signing
         --gpg-no-verify              Bypass gpg signature checks
         --[no-]verbose               Run verbosely
-
+```
 
 
 You can run straight from the repository, using the provided archive and modules directories
