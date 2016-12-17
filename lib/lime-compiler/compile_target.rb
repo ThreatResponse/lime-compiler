@@ -69,7 +69,7 @@ module LimeCompiler
     end
 
     def compile_lime
-      @logger.info "installing kernel headers for #{@name}"
+      @logger.info "compiling LiME for #{@name}"
       resp = @container.exec(@distro[:kernel_packages].split(" "), tty: true)
       @logger.debug resp
       @packages = kernel_packages(resp[0])
@@ -114,7 +114,7 @@ module LimeCompiler
 
     def module_built? kernel
       @logger.debug("checking if kernel already built: #{kernel}")
-      @existing_modules.include? "lime-#{kernel}.ko"
+      @existing_modules.any? { |s| s.include? "lime-#{kernel}.ko" }
     end
 
     def compile_for kernel
