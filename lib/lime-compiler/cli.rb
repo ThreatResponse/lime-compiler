@@ -88,7 +88,7 @@ module LimeCompiler
           @opts[:clobber] = clobber
         end
 
-        if @opts[:gpgsig].nil?
+        if @opts[:gpgsign].nil?
           @opts[:gpgsign] = gpgsign
         end
 
