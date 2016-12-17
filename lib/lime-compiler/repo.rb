@@ -281,7 +281,7 @@ module LimeCompiler
 
     def verify_signature file, sig_file
       sig = File.open(sig_file, 'r') {|f| f.read }
-      data = File.open(sig_file, 'r') {|f| f.read }
+      data = File.open(file, 'r') {|f| f.read }
       retval = nil
       @crypto.verify(sig, signed_text: data) do |signature|
         @logger.debug signature
