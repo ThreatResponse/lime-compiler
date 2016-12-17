@@ -108,6 +108,7 @@ module LimeCompiler
       @logger.debug "removing intermediate primary metadata at #{result[:path]}"
       File.delete(result[:path])
 
+      repomd_path
     end
 
     def rename path, checksum

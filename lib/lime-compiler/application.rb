@@ -89,7 +89,14 @@ module LimeCompiler
             end
           end
 
-          repo.generate_repodata opts[:module_dir]
+          repomd_path = repo.generate_repodata opts[:module_dir]
+          @@logger.debug "generated repodata #{repomd_path}"
+
+          if opts[:gpgsign]
+            repomd_sig_path = gpg.sign(repomd_path)
+            @@logger.debug "signed repo metadata #{repomd_sig_path}"
+          end
+
         rescue Exception => e
           @@logger.fatal e.message
           @@logger.debug e.backtrace.inspect
