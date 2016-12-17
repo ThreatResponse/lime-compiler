@@ -74,9 +74,15 @@ module LimeCompiler
           target.create_directories
           target.compile_lime
           modules = target.write_archive clobber: opts[:clobber]
+          @@logger.debug "exported kernel modules: #{modules}"
 
           if opts[:gpgsign]
             gpg = GPG.new(signer: opts[:gpgsigner])
+
+            existing_modules.each do |mod|
+              sig_path = gpg.sign(mod)
+              repo.generate_metadata mod, sig_path
+            end
 
             modules.each do |mod|
               sig_path = gpg.sign(mod)
@@ -84,6 +90,11 @@ module LimeCompiler
             end
           else
             sig_path = nil
+
+            existing_modules.each do |mod|
+              repo.generate_metadata mod, sig_path
+            end
+
             modules.each do |mod|
               repo.generate_metadata mod, sig_path
             end
