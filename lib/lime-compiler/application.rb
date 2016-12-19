@@ -78,7 +78,7 @@ module LimeCompiler
           target.clone_lime
           target.create_directories
           target.compile_lime
-          modules = target.write_archive clobber: opts[:clobber]
+          modules = target.write_archive clobber: opts[:build_all]
           @@logger.debug "exported kernel modules: #{modules}"
 
           if opts[:gpgsign]
@@ -88,7 +88,7 @@ module LimeCompiler
             end
 
             modules.each do |mod|
-              sig_path = gpg.sign(mod)
+              sig_path = gpg.sign(mod, overwrite: opts[:build_all])
               repo.generate_metadata mod, sig_path
             end
           else

@@ -12,7 +12,6 @@ module LimeCompiler
         verbose = false
         build_all = false
         gpgsign = false
-        clobber = false
         gpgnoverify = false
         quit = false
         error = false
@@ -48,10 +47,6 @@ module LimeCompiler
           @opts[:build_all] = v
         end
 
-        parser.on("--clobber", "Overwrite existing files in the module output directory") do |v|
-          @opts[:clobber] = v
-        end
-
         parser.on("--gpg-sign", "Sign compiled modules") do |v|
           @opts[:gpgsign] = v
         end
@@ -82,10 +77,6 @@ module LimeCompiler
 
         if @opts[:build_all].nil?
           @opts[:build_all] = build_all
-        end
-
-        if @opts[:clobber].nil?
-          @opts[:clobber] = clobber
         end
 
         if @opts[:gpgsign].nil?
