@@ -11,6 +11,7 @@ module LimeCompiler
       if @opts.empty?
         verbose = false
         build_all = false
+        sign_all = false
         gpgsign = false
         gpgnoverify = false
         quit = false
@@ -47,6 +48,10 @@ module LimeCompiler
           @opts[:build_all] = v
         end
 
+        parser.on("--sign-all", "Regenerate signatures for existing lime modules in the build root") do |v|
+          @opts[:sign_all] = v
+        end
+
         parser.on("--gpg-sign", "Sign compiled modules") do |v|
           @opts[:gpgsign] = v
         end
@@ -77,6 +82,10 @@ module LimeCompiler
 
         if @opts[:build_all].nil?
           @opts[:build_all] = build_all
+        end
+
+        if @opts[:sign_all].nil?
+          @opts[:sign_all] = build_all
         end
 
         if @opts[:gpgsign].nil?
