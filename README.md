@@ -22,7 +22,7 @@ Usage: lime-compiler [options]
     -m, --moduledir modules/         [Required] module output directory
     -a, --archive archive/           [Required] archive output directory
         --build-all                  Rebuild existing lime modules in the build root
-        --clobber                    Overwrite existing files in the module output directory
+        --sign-all                   Regenerate signatures for existing lime modules in the build root
         --gpg-sign                   Sign compiled modules
         --gpg-id identity            GPG id for module signing
         --gpg-no-verify              Bypass gpg signature checks
