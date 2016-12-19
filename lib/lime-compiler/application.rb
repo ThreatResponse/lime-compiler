@@ -52,6 +52,15 @@ module LimeCompiler
 
       if opts[:gpgsign]
         gpg = GPG.new(signer: opts[:gpgsigner])
+        existing_modules.each do |mod|
+          sig_path = gpg.sign(mod, overwrite: opts[:sign_all])
+          repo.generate_metadata mod, sig_path
+        end
+      else
+        sig_path = nil
+        existing_modules.each do |mod|
+          repo.generate_metadata mod, sig_path
+        end
       end
 
       errors = []
@@ -82,22 +91,12 @@ module LimeCompiler
           @@logger.debug "exported kernel modules: #{modules}"
 
           if opts[:gpgsign]
-            existing_modules.each do |mod|
-              sig_path = gpg.sign(mod)
-              repo.generate_metadata mod, sig_path
-            end
-
             modules.each do |mod|
               sig_path = gpg.sign(mod, overwrite: opts[:build_all])
               repo.generate_metadata mod, sig_path
             end
           else
             sig_path = nil
-
-            existing_modules.each do |mod|
-              repo.generate_metadata mod, sig_path
-            end
-
             modules.each do |mod|
               repo.generate_metadata mod, sig_path
             end
