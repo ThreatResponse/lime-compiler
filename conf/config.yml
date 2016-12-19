@@ -13,6 +13,7 @@ distributions:
       - '-y'
       - '-d1'
     check_package: ['/bin/bash', '-c', '/bin/rpm -qa | grep ']
+    check_arch: ['/bin/arch']
     kernel_packages: 'yum --showduplicates list kernel-devel'
     kernel_package_match: 'kernel\-devel\.x86_64'
     match_position: 0
@@ -31,6 +32,7 @@ distributions:
       - '-y'
       - '-d1'
     check_package: ['/bin/bash', '-c', '/bin/rpm -qa | grep ']
+    check_arch: ['/bin/arch']
     kernel_packages: '/usr/bin/yum --showduplicates list kernel-devel'
     kernel_package_match: 'kernel\-devel\.x86_64'
     match_position: 0
@@ -51,6 +53,7 @@ distributions:
       - '-q'
       - '-y'
     check_package: ['/usr/bin/dpkg', '-s', '']
+    check_arch: ['/usr/bin/arch']
     kernel_packages: '/usr/bin/apt-cache search linux-headers-.*-generic$'
     kernel_package_match: '^linux\-headers\-.*\-generic$'
     match_position: 0
@@ -70,6 +73,7 @@ distributions:
       - '-q'
       - '-y'
     check_package: ['/usr/bin/dpkg', '-s', '']
+    check_arch: ['/usr/bin/arch']
     kernel_packages: '/usr/bin/apt-cache search linux-headers-*'
     kernel_package_match: '^linux\-headers\-.*(?<!all)\-amd64$'
     match_position: 0

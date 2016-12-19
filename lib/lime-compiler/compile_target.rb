@@ -17,7 +17,7 @@ module LimeCompiler
       @module_dir = opts[:module_dir]
       @existing_modules = opts[:existing_modules]
       @build_all = opts[:build_all]
-      @arch = @container.exec(['/bin/arch'])[0][0].strip
+      @arch = @container.exec(@distro[:check_arch])[0][0].strip
 
       @logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler.compile-target'
