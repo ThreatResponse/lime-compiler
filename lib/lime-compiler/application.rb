@@ -50,6 +50,11 @@ module LimeCompiler
         client.pull(image[:image], image[:tag])
       end
 
+      if opts[:gpgsign]
+        gpg = GPG.new(signer: opts[:gpgsigner])
+      end
+
+      errors = []
       config[:images].each do |name, image|
 
         container_name = "lime_build_#{image[:image]}_#{image[:tag]}"
@@ -77,8 +82,6 @@ module LimeCompiler
           @@logger.debug "exported kernel modules: #{modules}"
 
           if opts[:gpgsign]
-            gpg = GPG.new(signer: opts[:gpgsigner])
-
             existing_modules.each do |mod|
               sig_path = gpg.sign(mod)
               repo.generate_metadata mod, sig_path
@@ -100,21 +103,23 @@ module LimeCompiler
             end
           end
 
-          repomd_path = repo.generate_repodata opts[:module_dir]
-          @@logger.debug "generated repodata #{repomd_path}"
-
-          if opts[:gpgsign]
-            repomd_sig_path = gpg.sign(repomd_path)
-            @@logger.debug "signed repo metadata #{repomd_sig_path}"
-          end
-
         rescue Exception => e
+          errors.append(e)
           @@logger.fatal e.message
           @@logger.debug e.backtrace.inspect
         end
-
         client.cleanup_container(c, delete: false)
+      end
 
+      if errors.empty?
+        repomd_path = repo.generate_repodata opts[:module_dir]
+        @@logger.debug "generated repodata #{repomd_path}"
+        if opts[:gpgsign]
+          repomd_sig_path = gpg.sign(repomd_path, overwrite: true)
+          @@logger.debug "signed repo metadata #{repomd_sig_path}"
+        end
+      else
+        @@logger.fatal "refusing to generate repo metadata due to the following errors #{errors}"
       end
 
       client.cleanup_containers(delete: false)
