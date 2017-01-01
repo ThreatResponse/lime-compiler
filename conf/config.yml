@@ -1,6 +1,8 @@
 ---
 docker:
   url: 'unix:///var/run/docker.sock'
+  write_timeout: 1800
+  read_timeout: 1800
 
 repository:
   packager: "lime-compiler info@threatresponse.cloud"

@@ -7,17 +7,16 @@ require 'zlib'
 module LimeCompiler
   class Repo
 
-    def initialize opts = {}
+    def initialize opts
+      @opts = opts
       @primary_metadata = {}
       @repo_metadata = {}
-      @crypto = GPGME::Crypto.new
-
       @metadata_dir = "repodata"
       @module_dir = "modules"
-      @gpgsign = opts[:gpgsign]
-      @gpgnoverify = opts[:gpgnoverify]
-      @packager = opts[:packager]
-      @platform = opts[:platform]
+      if opts[:gpg_home]
+        GPGME::Engine.home_dir = opts[:gpg_home]
+      end
+      @crypto = GPGME::Crypto.new
 
       @logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler.repo'
@@ -26,6 +25,8 @@ module LimeCompiler
         "#{datetime.strftime("%Y-%m-%dT%H:%M:%S%:z")} - #{progname} - #{severity} - #{msg}\n"
       end
       @logger.level = Application.log_level
+
+      setup_directories @opts[:module_dir]
     end
 
     def setup_directories path
@@ -62,10 +63,10 @@ module LimeCompiler
       metadata[:arch]      = "x86_64" # TODO: make this dynamic
       metadata[:checksum]  = self.sha256 mod_path
       metadata[:version]   = self.mod_name module_name
-      metadata[:packager]  = @packager
+      metadata[:packager]  = @opts[:packager]
       metadata[:location]  = "#{@module_dir}/#{module_name}"
       metadata[:signature] = signature_path
-      metadata[:platform]  = @platform
+      metadata[:platform]  = @opts[:platform]
 
       @logger.debug "generated metadata #{metadata} for #{mod_path}"
       @primary_metadata[mod_path] = metadata
@@ -165,7 +166,7 @@ module LimeCompiler
         @logger.debug "found existing repomd.xml at #{repomd_path}"
 
         # validate signature for repodata.xml
-        if @gpgsign and !@gpgnoverify
+        if @opts[:gpg_sign] and !@opts[:gpg_no_verify]
           @logger.debug "checking gpg signature for #{repomd_path}"
           repomd_sig_path = "#{repomd_path}.sig"
 

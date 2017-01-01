@@ -10,7 +10,7 @@ module LimeCompiler
     def run
 
       cli = Cli.new
-      opts = cli.options
+      config = cli.options
 
       @@logger = Logger.new(STDOUT).tap do |log|
         log.progname = 'lime-compiler'
@@ -19,16 +19,16 @@ module LimeCompiler
         "#{datetime.strftime("%Y-%m-%dT%H:%M:%S%:z")} - #{progname} - #{severity} - #{msg}\n"
       end
 
-      if opts[:verbose]
+      if config[:verbose]
         @@logger.level = Logger::DEBUG
       else
         @@logger.level = Logger::INFO
       end
 
       begin
-        @@logger.debug "validating options #{opts}"
-        cli.validate opts
-        config = YAML::load_file(opts[:config])
+        @@logger.debug "validating options #{config}"
+        cli.validate config
+        config[:config] = YAML::load_file(config[:config_path])
         config = self.symbolize config
       rescue Exception => e
         @@logger.fatal e.message
@@ -36,24 +36,21 @@ module LimeCompiler
         exit(1)
       end
 
-      client = LimeCompiler::DockerClient.new(config[:docker][:url])
-      repo_options = config[:repository]
-      repo_options.merge!({gpgsign: opts[:gpgsign]})
-      repo_options.merge!({gpgnoverify: opts[:gpgnoverify]})
-      repo = Repo.new(repo_options)
-      repo.setup_directories opts[:module_dir]
-      existing_modules = repo.modules opts[:module_dir]
+      client = LimeCompiler::DockerClient.new(config[:config][:docker])
+      repo = Repo.new(config[:repo_opts])
+      existing_modules = repo.modules config[:repo_opts][:module_dir]
       @@logger.debug "existing modules found: #{existing_modules}"
 
-      config[:images].each do |name, image|
+      config[:config][:images].each do |name, image|
         @@logger.info "pulling latest for #{image[:image]}:#{image[:tag]}"
         client.pull(image[:image], image[:tag])
       end
 
-      if opts[:gpgsign]
-        gpg = GPG.new(signer: opts[:gpgsigner])
+
+      if config[:repo_opts][:gpg_sign]
+        gpg = GPG.new(config[:gpg_opts])
         existing_modules.each do |mod|
-          sig_path = gpg.sign(mod, overwrite: opts[:sign_all])
+          sig_path = gpg.sign(mod, overwrite: config[:repo_opts][:sign_all])
           repo.generate_metadata mod, sig_path
         end
       else
@@ -64,22 +61,22 @@ module LimeCompiler
       end
 
       errors = []
-      config[:images].each do |name, image|
+      config[:config][:images].each do |name, image|
 
         container_name = "lime_build_#{image[:image]}_#{image[:tag]}"
         distro_name = image[:distribution]
-        distro = config[:distributions][distro_name.to_sym]
+        distro = config[:config][:distributions][distro_name.to_sym]
 
         @@logger.info "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
         c = client.container(container_name, image[:image], image[:tag],
                                'start': true, 'reuse': true)
 
-        target = CompileTarget.new(name: container_name, archive_name: name,
-                                   archive_dir: opts[:archive_dir],
-                                   module_dir: "#{opts[:module_dir]}/modules",
-                                   distro: distro, container: c,
-                                   existing_modules: existing_modules,
-                                   build_all: opts[:build_all])
+        local_opts = { name: container_name, archive_name: name,
+                       distro: distro, container: c,
+                       existing_modules: existing_modules }
+
+        target = CompileTarget.new(local_opts.merge!(config[:build_opts]))
+
         begin
           target.pre_actions
           target.update_sources
@@ -87,12 +84,12 @@ module LimeCompiler
           target.clone_lime
           target.create_directories
           target.compile_lime
-          modules = target.write_archive clobber: opts[:build_all]
+          modules = target.write_archive
           @@logger.debug "exported kernel modules: #{modules}"
 
-          if opts[:gpgsign]
+          if config[:repo_opts][:gpg_sign]
             modules.each do |mod|
-              sig_path = gpg.sign(mod, overwrite: opts[:build_all])
+              sig_path = gpg.sign(mod, overwrite: config[:repo_opts][:sign_all])
               repo.generate_metadata mod, sig_path
             end
           else
@@ -111,9 +108,9 @@ module LimeCompiler
       end
 
       if errors.empty?
-        repomd_path = repo.generate_repodata opts[:module_dir]
+        repomd_path = repo.generate_repodata config[:repo_opts][:module_dir]
         @@logger.debug "generated repodata #{repomd_path}"
-        if opts[:gpgsign]
+        if config[:repo_opts][:gpg_sign]
           repomd_sig_path = gpg.sign(repomd_path, overwrite: true)
           @@logger.debug "signed repo metadata #{repomd_sig_path}"
         end

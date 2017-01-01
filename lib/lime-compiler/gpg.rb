@@ -3,8 +3,11 @@ require 'gpgme'
 module LimeCompiler
   class GPG
 
-    def initialize opts = {}
-      @signer = opts[:gpgid]
+    def initialize opts
+      @opts = opts
+      if opts[:gpg_home]
+        GPGME::Engine.home_dir = opts[:gpg_home]
+      end
       @crypto = GPGME::Crypto.new
 
       @logger = Logger.new(STDOUT).tap do |log|
@@ -20,17 +23,17 @@ module LimeCompiler
       overwrite = opts[:overwrite] || false
       sigpath = "#{path}.sig"
       if !File.file? sigpath or overwrite
-        @logger.debug "signing #{path} with #{@signer}"
+        @logger.debug "signing #{path} with #{@opts[:gpg_id]}"
         File.open(path, 'r') do |f|
           contents = f.read
           File.open(sigpath, "w+") do |sigfile|
-            sig = @crypto.sign contents, mode: GPGME::SIG_MODE_DETACH, signer: @signer
+            sig = @crypto.sign contents, mode: GPGME::SIG_MODE_DETACH, signer: @opts[:gpg_id]
             sigfile.write(sig)
           end
         end
         sigpath
       else
-        @logger.debug "verifying existing signature #{path} with #{@signer}"
+        @logger.debug "verifying existing signature #{path} with #{@opts[:gpg_id]}"
         if self.verify_signature path, sigpath
           return sigpath
         else

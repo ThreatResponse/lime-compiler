@@ -3,10 +3,10 @@ require 'docker'
 module LimeCompiler
   class DockerClient
 
-    def initialize url, write_timeout = 1800, read_timeout = 1800
-      Docker.url = url
-      Excon.defaults[:write_timeout] = write_timeout
-      Excon.defaults[:read_timeout] = read_timeout
+    def initialize opts
+      Docker.url = opts[:url]
+      Excon.defaults[:write_timeout] = opts[:write_timeout]
+      Excon.defaults[:read_timeout] = opts[:read_timeout]
       @commands = { :park => ['bash', '-c', '/usr/bin/tail -f /dev/null'],
                     :get_lime => ['git', 'clone',
                                  'https://github.com/504ensicsLabs/LiME.git'],
