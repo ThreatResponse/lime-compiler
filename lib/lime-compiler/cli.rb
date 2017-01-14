@@ -27,8 +27,7 @@ module LimeCompiler
                                     enc_aes_iv: nil } }
 
     REQUIRED_KEYS = [:config_path]
-    REQUIRED_SUBKEYS = { repo_opts: [:module_dir, :archive_dir],
-                         build_opts: [:module_dir, :archive_dir] }
+    REQUIRED_SUBKEYS = { build_opts: [:module_dir, :archive_dir] }
 
     def initialize
       @opts = {}
@@ -126,29 +125,37 @@ module LimeCompiler
           exit(1)
         end
 
-        REQUIRED_KEYS.each do |key|
-          if @opts[key].nil?
-            puts "nil key #{key}"
-            exit_with_error = true
-          end
-        end
-
-        REQUIRED_SUBKEYS.each do |key, subkeys|
-          subkeys.each do |subkey|
-            if @opts[key][subkey].nil?
-              puts "nil key #{key} #{subkey}"
+        validation_errors = []
+        unless exit_without_error
+          REQUIRED_KEYS.each do |key|
+            if @opts[key].nil?
+              validation_errors << "config missing required key: #{key}"
               exit_with_error = true
             end
           end
+
+          REQUIRED_SUBKEYS.each do |key, subkeys|
+            subkeys.each do |subkey|
+              if @opts[key][subkey].nil?
+                validation_errors << "config missing required key: #{subkey}"
+                exit_with_error = true
+              end
+            end
+          end
+        end
+
+        if exit_with_error
+          validation_errors.each do |v|
+            puts v
+          end
+          puts parser
         end
 
       end
 
       if exit_with_error
-        puts "exiting with error"
         exit(1)
       elsif exit_without_error
-        puts "exiting without error"
         exit(0)
       end
 
