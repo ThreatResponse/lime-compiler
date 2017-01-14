@@ -1,3 +1,4 @@
+#require_relative 's3'
 require 'gpgme'
 require_relative 'crypto'
 
@@ -7,6 +8,9 @@ module LimeCompiler
     def initialize opts
       @opts = opts
       if opts[:gpg_home]
+        unless File.directory? opts[:gpg_home]
+          Dir.mkdir opts[:gpg_home]
+        end
         GPGME::Engine.home_dir = opts[:gpg_home]
       end
       @crypto = GPGME::Crypto.new
