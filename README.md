@@ -50,6 +50,40 @@ Build and install locally:
 
 Gem installation places `lime-compiler` in the systems path
 
+## Prepare GPG Keys For Unattended Builds
+
+To enable unattended builds with module signing the gpg key used for signing can be encrypted via kms and stored in an s3 bucket.
+
+The `gpg-setup` executable included with the gem generates a kms data encryption key which is used to encrypted the specified gpg key.
+
+Usage:
+
+```
+gpg-setup -h
+gpg-setup: Encrypts GPG key for storage
+    -h, --help                       Show this help message
+    --aws-region region          aws region
+    --kms-id id                  kms key id
+    --gpg-key-path path          path to gpg key
+    --gpg-key-id fingerprint     gpg key fingerprint
+```
+
+Example Run:
+
+```
+gpg-setup --aws-region <aws-region> \
+          --kms-id <kms-key-id> \
+          --gpg-key-path <path/to/gpg.key> \
+          --gpg-key-id <fingerprint>
+Exported encrypted AES key and IV to aes_export.aes
+Exported encrypted GPG key to gpg_export.aes
+```
+
+**Note:** The gpg being encrypted must already be exported from the system keychain
+
+**TODO:** Document IAM policy required for gpg-setup script
+
+**TODO:** Document IAM policy required for lime-compiler builds
 
 ## Example
 

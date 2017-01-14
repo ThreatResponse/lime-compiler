@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.homepage              = ""
 
   gem.files                 = `git ls-files -z`.split("\x0")
-  gem.executables           = %q(lime-compiler)
+  gem.executables           = %q(lime-compiler gpg-setup)
   gem.name                  = "lime-compiler"
   gem.require_paths         = ["lib"]
   gem.licenses              = ["MIT"]

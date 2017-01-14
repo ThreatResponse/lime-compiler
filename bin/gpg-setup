@@ -1,0 +1,139 @@
+#!/usr/bin/env ruby
+
+require 'aws-sdk'
+require 'optparse'
+require 'yaml'
+
+module LimeCompiler
+  class GPGSetupCli
+
+    DEFAULT_OPTIONS = { aws_region: nil,
+                        aes: {
+                          alg: "AES-256-CBC" },
+                        kms: {
+                          key_id: nil,
+                          key_spec: 'AES_256' },
+                        gpg: {
+                          key_path: nil,
+                          fingerprint: nil } }
+
+    def initialize
+      @opts = {}
+    end
+
+    def options
+      help = false
+      if @opts.empty?
+        @opts = DEFAULT_OPTIONS
+
+        parser = OptionParser.new
+        parser.banner = "gpg-setup: Encrypts GPG key for storage"
+
+        parser.on("-h", "--help", "Show this help message") do ||
+          puts parser
+          help = true
+        end
+
+        parser.on("--aws-region region", "aws region") do |v|
+          @opts[:aws_region] = v
+        end
+
+        parser.on("--kms-id id", "kms key id") do |v|
+          @opts[:kms][:key_id] = v
+        end
+
+        parser.on("--gpg-key-path path", "path to gpg key") do |v|
+          @opts[:gpg][:key_path] = v
+        end
+
+        parser.on("--gpg-key-id fingerprint", "gpg key fingerprint") do |v|
+          @opts[:gpg][:fingerprint] = v
+        end
+
+        begin
+          parser.parse!
+        rescue Exception => e
+          puts e.message
+          puts parser
+          exit(1)
+        end
+      end
+
+      if help
+        exit(0)
+      end
+      @opts
+    end
+  end
+
+  class GPGSetup
+
+    def initialize opts
+      @opts = opts
+      @kms = Aws::KMS::Client.new(region: @opts[:aws_region])
+      @aes = OpenSSL::Cipher.new(@opts[:aes][:alg])
+      @dek = nil
+      @iv = nil
+      @ggp_data = nil
+    end
+
+    def export_aes path
+      plaintext = { dek: dek.ciphertext_blob,
+                    aes_iv: iv }
+      ciphertext = kms_encrypt plaintext.to_yaml
+      File.open(path, 'w+') { |f| f.write([ciphertext.ciphertext_blob].pack('m')) }
+    end
+
+    def export_gpg path
+      ciphertext = aes_encrypt gpg_key
+      File.open(path, 'w+') { |f| f.write([ciphertext].pack('m')) }
+    end
+
+    def aes_encrypt data
+      @aes.encrypt
+      @aes.key = dek.plaintext
+      @aes.iv = iv
+      @aes.update(data) + @aes.final
+    end
+
+    def kms_encrypt data
+      @kms.encrypt(key_id: @opts[:kms][:key_id], plaintext: data)
+    end
+
+    private
+
+    def dek
+      unless @dek
+        @dek = @kms.generate_data_key(
+          key_id: @opts[:kms][:key_id],
+          key_spec: @opts[:kms][:key_spec],
+          encryption_context: { 'gpg-fingerprint' => @opts[:gpg][:fingerprint] }
+        )
+      end
+      @dek
+    end
+
+    def iv
+      unless @iv
+        @iv = @aes.random_iv
+      end
+      @iv
+    end
+
+    def gpg_key
+      unless @gpg_data
+        @gpg_data = File.read(@opts[:gpg][:key_path])
+      end
+      @gpg_data
+    end
+  end
+end
+
+cli = LimeCompiler::GPGSetupCli.new
+setup = LimeCompiler::GPGSetup.new cli.options
+aes_export_path = 'aes_export.aes'
+gpg_export_path = 'gpg_export.aes'
+setup.export_aes aes_export_path
+puts "Exported encrypted AES key and IV to #{aes_export_path}"
+setup.export_gpg gpg_export_path
+puts "Exported encrypted GPG key to #{gpg_export_path}"
