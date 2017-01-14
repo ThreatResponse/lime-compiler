@@ -1,4 +1,5 @@
 require 'gpgme'
+require_relative 'crypto'
 
 module LimeCompiler
   class GPG
@@ -17,6 +18,16 @@ module LimeCompiler
         "#{datetime.strftime("%Y-%m-%dT%H:%M:%S%:z")} - #{progname} - #{severity} - #{msg}\n"
       end
       @logger.level = Application.log_level
+    end
+
+    def import_key kms_opts
+      crypto = Crypto.new kms_opts
+      aes_ciphertext = File.read(@opts[:aes_export]).unpack('m')[0]
+      gpg_ciphertext = File.read(@opts[:gpg_export]).unpack('m')[0]
+      aes_info = YAML::load(crypto.kms_decrypt aes_ciphertext)
+      aes_key = crypto.kms_decrypt aes_info[:dek], {"gpg-fingerprint" => @opts[:gpg_id]}
+      gpg_key_data = crypto.aes_decrypt gpg_ciphertext, aes_key, aes_info[:aes_iv]
+      GPGME::Key.import gpg_key_data
     end
 
     def sign path, opts = {}
