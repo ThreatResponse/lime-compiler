@@ -97,20 +97,12 @@ module LimeCompiler
           @opts[:kms_opts][:kms_region] = v
         end
 
-        parser.on("--kms-data-key data.key", "Path to kms data encryption key [optional s3:// prefix]") do |v|
+        parser.on("--aes-key-export export.aes", "Path to aes key export created with gpg-setup") do |v|
           @opts[:kms_opts][:kms_data_key] = v
         end
 
-        parser.on("--encrypted-gpg-key gpg.blob", "Path to encrypted gpg key [optional s3:// prefix]") do |v|
+        parser.on("--gpg-key-export export.aes", "Path to encrypted gpg key created with gpg-setup") do |v|
           @opts[:repo_opts][:enc_gpg_key] = v
-        end
-
-        parser.on("--encrypted-pass pass.blob", "Path to encrypted gpg passphrase [optional s3:// prefix]") do |v|
-          @opts[:repo_opts][:enc_gpg_pass] = v
-        end
-
-        parser.on("--encrypted-aes-iv iv.blob", "Path to encrypted AES_256 IV [optional s3:// prefix]") do |v|
-          @opts[:kms_opts][:enc_aes_iv] = v
         end
 
         parser.on("--[no-]verbose", "Run verbosely") do |v|
