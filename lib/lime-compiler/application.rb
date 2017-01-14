@@ -37,6 +37,14 @@ module LimeCompiler
       end
 
       client = LimeCompiler::DockerClient.new(config[:config][:docker])
+
+      if config[:repo_opts][:gpg_sign]
+        gpg = GPG.new(config[:gpg_opts])
+        if import_key_required_opts config
+          gpg.import_key config[:kms_opts]
+        end
+      end
+
       repo = Repo.new(config[:repo_opts])
       existing_modules = repo.modules config[:repo_opts][:module_dir]
       @@logger.debug "existing modules found: #{existing_modules}"
@@ -132,6 +140,15 @@ module LimeCompiler
         end
         ret
       end ]
+    end
+
+    def import_key_required_opts opts
+      kms_ok = !(opts[:kms_opts][:kms_region].nil?)
+      gpg_ok = !(opts[:gpg_opts][:gpg_id].nil? and opts[:gpg_opts][:aes_export].nil? and opts[:gpg_opts][:gpg_export].nil?  )
+      #repo_ok = !(opts[:repo_opts][:gpg_sign].nil? and opts[:repo_opts][:aes_export].nil? and opts[:repo_opts][:gpg_export].nil?)
+      repo_ok = !(opts[:repo_opts][:gpg_sign].nil?)
+
+      kms_ok and gpg_ok and repo_ok
     end
 
     def self.log_level
