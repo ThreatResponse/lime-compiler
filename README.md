@@ -22,10 +22,14 @@ Usage: lime-compiler [options]
     -m, --moduledir modules/         [Required] module output directory
     -a, --archive archive/           [Required] archive output directory
         --build-all                  Rebuild existing lime modules in the build root
-        --sign-all                   Regenerate signatures for existing lime modules in the build root
         --gpg-sign                   Sign compiled modules
+        --sign-all                   Regenerate signatures for existing modules in build root
         --gpg-id identity            GPG id for module signing
         --gpg-no-verify              Bypass gpg signature checks
+        --gpg-home path/to/gpghome   Custom gpg home directory
+        --kms-region region          AWS region for KMS client instantiation
+        --aes-key-export export.aes  Path to aes key export created with gpg-setup
+        --gpg-key-export export.aes  Path to encrypted gpg key created with gpg-setup
         --[no-]verbose               Run verbosely
 ```
 
