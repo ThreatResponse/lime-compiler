@@ -15,7 +15,8 @@ module LimeCompiler
                           key_spec: 'AES_256' },
                         gpg: {
                           key_path: nil,
-                          fingerprint: nil } }
+                          fingerprint: nil,
+                          passphrase: nil } }
 
     def initialize
       @opts = {}
@@ -48,6 +49,10 @@ module LimeCompiler
 
         parser.on("--gpg-key-id fingerprint", "gpg key fingerprint") do |v|
           @opts[:gpg][:fingerprint] = v
+        end
+
+        parser.on("--gpg-key-passphrase pass", "gpg key passphrase") do |v|
+          @opts[:gpg][:passphrase] = v
         end
 
         begin
@@ -85,7 +90,9 @@ module LimeCompiler
     end
 
     def export_gpg path
-      ciphertext = aes_encrypt gpg_key
+      plaintext = { gpg_key: gpg_key,
+                    passphrase: @opts[:gpg][:passphrase] }
+      ciphertext = aes_encrypt plaintext.to_yaml
       File.open(path, 'w+') { |f| f.write([ciphertext].pack('m')) }
     end
 
