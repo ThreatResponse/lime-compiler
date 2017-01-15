@@ -12,10 +12,8 @@ phases:
       - /usr/local/rvm/scripts/rvm get stable --autolibs=enable
       - /usr/local/rvm/scripts/rvm install ruby-2.3.3
       - /usr/local/rvm/scripts/rvm --default use ruby-2.3.3
-      - /usr/local/rvm/scripts/rvm use 2.3.3
-      - git clone https://github.com/ThreatResponse/lime-compiler.git
-      - /usr/local/rvm/scripts/rvm use 2.3.3 && gem install bundler
-      - /usr/local/rvm/scripts/rvm use 2.3.3 && cd lime-compiler && bundle install
+      - /bin/bash -c "gem install bundler"
+      - /bin/bash -c "bundle install"
       - echo creating required directories
       - mkdir -p build/modules/
       - mkdir -p build/repodata/
@@ -25,7 +23,7 @@ phases:
       - aws s3 sync build/modules/ s3://threatresponse-lime-modules/modules/
       - aws s3 sync build/modules/ s3://threatresponse-lime-modules/repodata/
       - echo Beginning run of the lime compiler `date`
-      - /usr/local/rvm/scripts/rvm use 2.3.3 && cd lime-compiler && ./bin/lime-compiler -c $CONFIG_PATH -m build/ -a archive/ `eval($OPTIONAL_ARGS)`
+      - /bin/bash -c "./bin/lime-compiler -c $CONFIG_PATH -m build/ -a archive/ `eval($OPTIONAL_ARGS)`"
   post_build:
     commands:
       - echo "Syncing "
