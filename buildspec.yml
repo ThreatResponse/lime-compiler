@@ -14,8 +14,8 @@ phases:
       - /usr/local/rvm/scripts/rvm --default use ruby-2.3.1
       - /usr/local/rvm/scripts/rvm use 2.3.1
       - git clone https://github.com/ThreatResponse/lime-compiler.git
-      - cd lime-compiler && gem build lime-compiler.gemspec
-      - gem install lime-compiler/lime-compiler-0.0.1.pre.gem
+      - /usr/local/rvm/scripts/rvm use 2.3.1 && cd lime-compiler && gem build lime-compiler.gemspec
+      - /usr/local/rvm/scripts/rvm use 2.3.1 && gem install lime-compiler/lime-compiler-0.0.1.pre.gem
       - echo creating required directories
       - mkdir -p build/modules/
       - mkdir -p build/repodata/
@@ -25,7 +25,7 @@ phases:
       - aws s3 sync build/modules/ s3://threatresponse-lime-modules/modules/
       - aws s3 sync build/modules/ s3://threatresponse-lime-modules/repodata/
       - echo Beginning run of the lime compiler `date`
-      - lime-compiler -c $CONFIG_PATH -m build/ -a archive/ `eval($OPTIONAL_ARGS)`
+      - /usr/local/rvm/scripts/rvm use 2.3.1 && lime-compiler -c $CONFIG_PATH -m build/ -a archive/ `eval($OPTIONAL_ARGS)`
   post_build:
     commands:
       - echo "Syncing "
