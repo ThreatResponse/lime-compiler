@@ -4,6 +4,12 @@ phases:
   pre_build:
     commands:
       - echo Installing the lime-compiler gem
+      - apt-get update -y
+      - curl -L https://get.rvm.io | bash -s stable --ruby
+      - rvm get stable --autolibs=enable
+      - rvm install ruby
+      - rvm --default use ruby-2.3.1
+      - gem update --system
       - gem install specific_install
       - gem specific_install -l https://github.com/ThreatResponse/lime-compiler.git
       - echo creating required directories
