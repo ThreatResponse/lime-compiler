@@ -5,7 +5,7 @@ phases:
     commands:
       - echo Installing the lime-compiler gem
       - apt-get update -y
-      - apt-get install -y rubygems build-essential
+      - apt-get install -y git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev nodejs
       - curl -L https://get.rvm.io | bash -s stable --ruby
       - . /etc/profile.d/rvm.sh
       - rvm get stable --autolibs=enable
