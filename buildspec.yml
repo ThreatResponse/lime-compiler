@@ -8,9 +8,10 @@ phases:
       - apt-get install -y git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev nodejs
       - curl -L https://get.rvm.io | bash -s stable --ruby
       - . /etc/profile.d/rvm.sh
-      - rvm get stable --autolibs=enable
-      - rvm install ruby-2.3.1
-      - rvm --default use ruby-2.3.1
+      - /usr/local/rvm/scripts/rvm get stable --autolibs=enable
+      - /usr/local/rvm/scripts/rvm install ruby-2.3.1
+      - /usr/local/rvm/scripts/rvm --default use ruby-2.3.1
+      - /usr/local/rvm/scripts/rvm use 2.3.1
       - gem update --system
       - gem install specific_install
       - gem specific_install -l https://github.com/ThreatResponse/lime-compiler.git
