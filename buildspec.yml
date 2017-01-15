@@ -8,10 +8,10 @@ phases:
       - apt-get install -y git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev nodejs
       - apt-get install -y rubygems-integration
       - curl -L https://get.rvm.io | bash -s stable --ruby
-      - . /etc/profile.d/rvm.sh
-      - /usr/local/rvm/scripts/rvm get stable --autolibs=enable
-      - /usr/local/rvm/scripts/rvm install ruby-2.3.3
-      - /usr/local/rvm/scripts/rvm --default use ruby-2.3.3
+      - /bin/bash -c ". /etc/profile.d/rvm.sh"
+      - /bin/bash -c "/usr/local/rvm/scripts/rvm get stable --autolibs=enable"
+      - /bin/bash -c "/usr/local/rvm/scripts/rvm install ruby-2.3.0"
+      - /bin/bash -c "/usr/local/rvm/scripts/rvm --default use ruby-2.3.0"
       - /bin/bash -c "gem install bundler"
       - /bin/bash -c "bundle install"
       - echo creating required directories
