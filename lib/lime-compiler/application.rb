@@ -56,7 +56,6 @@ module LimeCompiler
 
 
       if config[:repo_opts][:gpg_sign]
-        gpg = GPG.new(config[:gpg_opts])
         existing_modules.each do |mod|
           sig_path = gpg.sign(mod, overwrite: config[:repo_opts][:sign_all])
           repo.generate_metadata mod, sig_path

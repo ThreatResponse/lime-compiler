@@ -13,6 +13,7 @@ module LimeCompiler
         end
         GPGME::Engine.home_dir = opts[:gpg_home]
       end
+      @passphrase = nil
       @crypto = GPGME::Crypto.new
 
       @logger = Logger.new(STDOUT).tap do |log|
@@ -52,9 +53,10 @@ module LimeCompiler
       @logger.debug "decrypting aes key with KMS"
       aes_key = crypto.kms_decrypt aes_info[:dek], {"gpg-fingerprint" => @opts[:gpg_id]}
       @logger.debug "decrypting gpg key with openssl"
-      gpg_key_data = crypto.aes_decrypt gpg_ciphertext, aes_key, aes_info[:aes_iv]
+      gpg_data = YAML::load(crypto.aes_decrypt gpg_ciphertext, aes_key, aes_info[:aes_iv])
       @logger.info "importing gpg key: #{@opts[:gpg_id]} from #{@opts[:gpg_export]}"
-      GPGME::Key.import gpg_key_data
+      @passphrase = gpg_data[:passphrase]
+      GPGME::Key.import gpg_data[:gpg_key]
     end
 
     def sign path, opts = {}
@@ -65,7 +67,10 @@ module LimeCompiler
         File.open(path, 'r') do |f|
           contents = f.read
           File.open(sigpath, "w+") do |sigfile|
-            sig = @crypto.sign contents, mode: GPGME::SIG_MODE_DETACH, signer: @opts[:gpg_id]
+            sig = @crypto.sign contents, { mode: GPGME::SIG_MODE_DETACH,
+                                           signer: @opts[:gpg_id],
+                                           passphrase_callback: method(:passfunc),
+                                           pinentry_mode: GPGME::PINENTRY_MODE_LOOPBACK }
             sigfile.write(sig)
           end
         end
@@ -93,5 +98,12 @@ module LimeCompiler
       retval
     end
 
+    private
+      def passfunc(hook, uid_hint, passphrase_info, prev_was_bad, fd)
+        @logger.debug "automatically supplying passphrase for #{uid_hint}: "
+        io = IO.for_fd(fd, 'w')
+        io.puts(@passphrase)
+        io.flush
+      end
   end
 end
