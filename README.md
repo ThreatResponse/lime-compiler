@@ -39,6 +39,7 @@ You can run straight from the repository, using the provided archive and modules
 ## Requirements
 
 Ensure docker is installed and the user running `lime-compiler` can write to the docker socket
+GPG v2.1 or higher is required for signing modules with a passphrase protected GPG key
 
 ## Installation
 
@@ -60,16 +61,20 @@ To enable unattended builds with module signing the gpg key used for signing can
 
 The `gpg-setup` executable included with the gem generates a kms data encryption key which is used to encrypted the specified gpg key.
 
+Optionally a passphrase can be supplied for the gpg key being encrypted
+
 Usage:
 
 ```
 gpg-setup -h
 gpg-setup: Encrypts GPG key for storage
     -h, --help                       Show this help message
-    --aws-region region          aws region
-    --kms-id id                  kms key id
-    --gpg-key-path path          path to gpg key
-    --gpg-key-id fingerprint     gpg key fingerprint
+        --aws-region region          aws region
+        --kms-id id                  kms key id
+        --gpg-key-path path          path to gpg key
+        --gpg-key-id fingerprint     gpg key fingerprint
+        --gpg-key-passphrase pass    gpg key passphrase
+
 ```
 
 Example Run:
@@ -78,12 +83,13 @@ Example Run:
 gpg-setup --aws-region <aws-region> \
           --kms-id <kms-key-id> \
           --gpg-key-path <path/to/gpg.key> \
-          --gpg-key-id <fingerprint>
+          --gpg-key-id <fingerprint> \
+          --gpg-key-passphrase <passphrase>
 Exported encrypted AES key and IV to aes_export.aes
 Exported encrypted GPG key to gpg_export.aes
 ```
 
-**Note:** The gpg being encrypted must already be exported from the system keychain
+**Note:** The gpg being encrypted must already be exported from the user's keychain
 
 **TODO:** Document IAM policy required for gpg-setup script
 
