@@ -24,6 +24,7 @@ phases:
       - aws s3 sync build/modules/ s3://threatresponse-lime-modules/modules/
       - aws s3 sync build/modules/ s3://threatresponse-lime-modules/repodata/
       - echo Beginning run of the lime compiler `date`
+      - lime-compiler -c $CONFIG_PATH -m build/ -a archive/ `eval($OPTIONAL_ARGS)`
   post_build:
     commands:
       - echo "Syncing "
