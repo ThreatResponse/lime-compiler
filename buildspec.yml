@@ -1,0 +1,20 @@
+version: 0.1
+
+phases:
+  pre_build:
+    commands:
+      - echo Installing the lime-compiler gem
+      - gem install specific_install
+      - gem specific_install -l https://github.com/ThreatResponse/lime-compiler.git
+      - echo creating required directories
+      - mkdir -p build/modules/
+      - mkdir -p build/repodata/
+      - mkdir -p archive/
+  build:
+    commands:
+      - aws s3 sync build/modules/ s3://threatresponse-lime-modules/modules/
+      - aws s3 sync build/modules/ s3://threatresponse-lime-modules/repodata/
+      - echo Beginning run of the lime compiler `date`
+  post_build:
+    commands:
+      - echo "Syncing "
