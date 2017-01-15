@@ -6,6 +6,7 @@ phases:
       - echo Installing the lime-compiler gem
       - apt-get update -y
       - curl -L https://get.rvm.io | bash -s stable --ruby
+      - . /usr/local/rvm/scripts/rvm
       - rvm get stable --autolibs=enable
       - rvm install ruby
       - rvm --default use ruby-2.3.1
