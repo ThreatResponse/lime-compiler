@@ -10,10 +10,11 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 2.0.0'
   gem.description           = %q{A ruby wrapper for docker and LiME}
   gem.summary               = %q{Builds LiME kernel modules with docker}
-  gem.homepage              = ""
+  gem.homepage              = "https://github.com/ThreatResponse/lime-compiler"
 
   gem.files                 = `git ls-files -z`.split("\x0")
-  gem.executables           = %q(lime-compiler gpg-setup)
+  gem.executables           << 'lime-compiler'
+  gem.executables           << 'gpg-setup'
   gem.name                  = "lime-compiler"
   gem.require_paths         = ["lib"]
   gem.licenses              = ["MIT"]
