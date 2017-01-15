@@ -1,6 +1,6 @@
-#require_relative 's3'
 require 'gpgme'
 require_relative 'crypto'
+require_relative 's3'
 
 module LimeCompiler
   class GPG
@@ -26,11 +26,34 @@ module LimeCompiler
 
     def import_key kms_opts
       crypto = Crypto.new kms_opts
-      aes_ciphertext = File.read(@opts[:aes_export]).unpack('m')[0]
-      gpg_ciphertext = File.read(@opts[:gpg_export]).unpack('m')[0]
+      s3 = nil
+      @logger.debug "fetching aes ciphertext from #{@opts[:aes_export]}"
+      if @opts[:aes_export][0..4] == "s3://"
+        unless s3
+          s3 = S3.new
+        end
+        aes_ciphertext = s3.fetch_data(@opts[:aes_export]).unpack('m')[0]
+      else
+        aes_ciphertext = File.read(@opts[:aes_export]).unpack('m')[0]
+      end
+
+      @logger.debug "fetching gpg ciphertext from #{@opts[:gpg_export]}"
+      if @opts[:gpg_export][0..4] == "s3://"
+        unless s3
+          s3 = S3.new
+        end
+        gpg_ciphertext = s3.fetch_data(@opts[:gpg_export]).unpack('m')[0]
+      else
+        gpg_ciphertext = File.read(@opts[:gpg_export]).unpack('m')[0]
+      end
+
+      @logger.debug "decrypting aes initialization vector with KMS"
       aes_info = YAML::load(crypto.kms_decrypt aes_ciphertext)
+      @logger.debug "decrypting aes key with KMS"
       aes_key = crypto.kms_decrypt aes_info[:dek], {"gpg-fingerprint" => @opts[:gpg_id]}
+      @logger.debug "decrypting gpg key with openssl"
       gpg_key_data = crypto.aes_decrypt gpg_ciphertext, aes_key, aes_info[:aes_iv]
+      @logger.info "importing gpg key: #{@opts[:gpg_id]} from #{@opts[:gpg_export]}"
       GPGME::Key.import gpg_key_data
     end
 
