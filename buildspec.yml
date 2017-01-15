@@ -5,10 +5,12 @@ phases:
     commands:
       - echo Installing the lime-compiler gem
       - apt-get update -y
+      - apt-get install -y rubygems build-essential
       - curl -L https://get.rvm.io | bash -s stable --ruby
-      - . /usr/local/rvm/scripts/rvm
-      - /usr/local/rvm/scripts/rvm install ruby-2.3.1
-      - /usr/local/rvm/scripts/rvm --default use ruby-2.3.1
+      - . /etc/profile.d/rvm.sh
+      - rvm get stable --autolibs=enable
+      - rvm install ruby-2.3.1
+      - rvm --default use ruby-2.3.1
       - gem update --system
       - gem install specific_install
       - gem specific_install -l https://github.com/ThreatResponse/lime-compiler.git
