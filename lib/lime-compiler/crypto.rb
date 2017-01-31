@@ -8,7 +8,6 @@ module LimeCompiler
     end
 
     def kms_decrypt data, encryption_context = nil
-      puts encryption_context
       @kms.decrypt(ciphertext_blob: data,
                    encryption_context: encryption_context
                   ).plaintext

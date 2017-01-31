@@ -76,7 +76,7 @@ module LimeCompiler
 
         @@logger.info "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
         c = client.container(container_name, image[:image], image[:tag],
-                               'start': true, 'reuse': true)
+                               start: true, reuse: true)
 
         local_opts = { name: container_name, archive_name: name,
                        distro: distro, container: c,

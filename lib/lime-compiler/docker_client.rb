@@ -37,10 +37,10 @@ module LimeCompiler
     # TODO: raise a meaningful error when a container is already running
     #       shaemlessly refuse to build if the container is running
     def container name, image, tag, opts = {}
-      defaults = {'command':  @commands[:park],
-                  'register': true,
-                  'start': false,
-                  'reuse': false}
+      defaults = {command:  @commands[:park],
+                  register: true,
+                  start: false,
+                  reuse: false}
       opts = defaults.merge(opts)
 
       begin
