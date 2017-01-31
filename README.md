@@ -121,6 +121,38 @@ Below is a truncated example of a build, note that files ending in .sig are only
         ├── repomd.xml
         └── repomd.xml.sig
 
+## Running Builds With Docker
+
+Use the included Dockerfile to build a local container that includes gpg v2.1, ruby 2.3, and the latest version of lime-compiler
+The included Makefile sources a customization file `.env_make` in which you should include configuration for the following volumes and environment variables.
+
+Volumes:
+```
+/var/run/docker.sock
+/opt/lime-compiler/archive
+/opt/lime-compiler/build
+/opt/lime-compiler/conf
+```
+
+Environment Variables:
+```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+```
+
+Additional environment variables may be included here as well, as shown in this example:
+
+```
+VOLUMES = -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd)/build:/opt/lime-compiler/build -v $(shell pwd)/archive:/opt/lime-compiler/archive -v $(shell pwd)/conf:/opt/lime-compiler/conf
+ENV = -e CONFIG_PATH="conf/config.yml" -e GPG_HOME="build_gpg_home" -e GPG_FINGERPRINT="gpg-fingerprint" -e KMS_REGION="us-west-2" -e S3_REGION="us-west-2" -e AES_KEY_EXPORT_PATH="s3://bucket/path/to/aes_export.aes" -e GPG_KEY_EXPORT_PATH="s3://bucket/path/to/gpg_export.aes" -e AWS_ACCESS_KEY_ID="key-id" -e AWS_SECRET_ACCESS_KEY="secret-key"
+```
+
+Build the container with `make build` then start a shell on the container with `make shell`.
+
+Example build invocation:
+```
+lime-compiler -c conf/config.yml -m build/ -a archive/ --gpg-sign --gpg-id $GPG_FINGERPRINT --gpg-home $GPG_HOME --kms-region $KMS_REGION --aes-key-export $AES_KEY_EXPORT_PATH --gpg-key-export $GPG_KEY_EXPORT_PATH --rm-gpg-home
+```
 
 ## Docker Custimization
 
