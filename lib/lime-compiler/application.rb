@@ -1,4 +1,5 @@
 require 'logger'
+require 'fileutils'
 require 'yaml'
 require_relative 'cli'
 require_relative 'compile_target'
@@ -120,6 +121,9 @@ module LimeCompiler
         if config[:repo_opts][:gpg_sign]
           repomd_sig_path = gpg.sign(repomd_path, overwrite: true)
           @@logger.debug "signed repo metadata #{repomd_sig_path}"
+          if config[:repo_opts][:rm_gpg_home]
+            FileUtils.rm_r config[:repo_opts][:gpg_home]
+          end
         end
       else
         @@logger.fatal "refusing to generate repo metadata due to the following errors #{errors}"

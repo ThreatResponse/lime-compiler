@@ -13,12 +13,13 @@ module LimeCompiler
                                      gpg_sign: false,
                                      sign_all: false,
                                      gpg_no_verify: false,
-                                     gpg_home: nil,
+                                     gpg_home: "~/.gnupg",
+                                     rm_gpg_home: false,
                                      gpg_id: nil},
                         build_opts: { build_all: false,
                                       module_dir: nil,
                                       archive_dir: nil },
-                        gpg_opts: { gpg_home: nil,
+                        gpg_opts: { gpg_home: "~/.gnupg",
                                     gpg_id: nil,
                                     aes_export: nil,
                                     gpg_export: nil,
@@ -91,6 +92,10 @@ module LimeCompiler
         parser.on("--gpg-home path/to/gpghome", "Custom gpg home directory") do |v|
           @opts[:gpg_opts][:gpg_home] = v
           @opts[:repo_opts][:gpg_home] = v
+        end
+
+        parser.on("--rm-gpg-home", "Custom gpg home directory") do |v|
+          @opts[:repo_opts][:rm_gpg_home] = v
         end
 
         parser.on("--kms-region region", "AWS region for KMS client instantiation") do |v|
