@@ -13,8 +13,7 @@ Gem::Specification.new do |gem|
   gem.homepage              = "https://github.com/ThreatResponse/lime-compiler"
 
   gem.files                 = `git ls-files -z`.split("\x0")
-  gem.executables           << 'lime-compiler'
-  gem.executables           << 'gpg-setup'
+  gem.executables           = %w[lime-compiler gpg-setup]
   gem.name                  = "lime-compiler"
   gem.require_paths         = ["lib"]
   gem.licenses              = ["MIT"]
