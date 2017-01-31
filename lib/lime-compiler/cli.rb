@@ -21,7 +21,8 @@ module LimeCompiler
                         gpg_opts: { gpg_home: nil,
                                     gpg_id: nil,
                                     aes_export: nil,
-                                    gpg_export: nil },
+                                    gpg_export: nil,
+                                    s3_region: nil },
                         kms_opts: { kms_region: nil } }
 
     REQUIRED_KEYS = [:config_path]
@@ -94,6 +95,10 @@ module LimeCompiler
 
         parser.on("--kms-region region", "AWS region for KMS client instantiation") do |v|
           @opts[:kms_opts][:kms_region] = v
+        end
+
+        parser.on("--s3-region region", "AWS region for S3 client instantiation") do |v|
+          @opts[:gpg_opts][:s3_region] = v
         end
 
         parser.on("--aes-key-export export.aes", "Path to aes key export created with gpg-setup") do |v|

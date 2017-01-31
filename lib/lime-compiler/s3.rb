@@ -3,8 +3,8 @@ require 'aws-sdk'
 module LimeCompiler
   class S3
 
-    def initialize
-      @s3 = Aws::S3::Client.new
+    def initialize opts
+      @s3 = Aws::S3::Client.new region: opts[:region]
     end
 
     def fetch_data uri, opts = {}

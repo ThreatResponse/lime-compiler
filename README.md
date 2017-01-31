@@ -28,6 +28,7 @@ Usage: lime-compiler [options]
         --gpg-no-verify              Bypass gpg signature checks
         --gpg-home path/to/gpghome   Custom gpg home directory
         --kms-region region          AWS region for KMS client instantiation
+        --s3-region region           AWS region for S3 client instantiation
         --aes-key-export export.aes  Path to aes key export created with gpg-setup
         --gpg-key-export export.aes  Path to encrypted gpg key created with gpg-setup
         --[no-]verbose               Run verbosely
