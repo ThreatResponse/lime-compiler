@@ -3,27 +3,17 @@ version: 0.1
 phases:
   pre_build:
     commands:
-      - echo Installing the lime-compiler gem
-      - apt-get update -y
-      - apt-get install -y git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev nodejs
-      - apt-get install -y rubygems-integration
-      - curl -L https://get.rvm.io | bash -s stable --ruby
-      - . /etc/profile.d/rvm.sh
-      - /usr/local/rvm/scripts/rvm get stable --autolibs=enable
-      - /usr/local/rvm/scripts/rvm install ruby-2.3.3
-      - /usr/local/rvm/scripts/rvm --default use ruby-2.3.3
-      - gem install bundler
-      - bundle install
-      - echo creating required directories
       - mkdir -p build/modules/
       - mkdir -p build/repodata/
-      - mkdir -p archive/
+      - docker pull joelferrier/lime-compiler:latest
   build:
     commands:
-      - aws s3 sync build/modules/ s3://threatresponse-lime-modules/modules/
-      - aws s3 sync build/modules/ s3://threatresponse-lime-modules/repodata/
+      - aws s3 sync s3://threatresponse-lime-modules/modules/ build/modules/
+      - aws s3 sync s3://threatresponse-lime-modules/repodata/ build/repodata/
       - echo Beginning run of the lime compiler `date`
-      - ./bin/lime-compiler -c $CONFIG_PATH -m build/ -a archive/ `eval($OPTIONAL_ARGS)`
+      - codebuild-scripts/run-container.sh
+      - aws s3 sync build/modules/  s3://threatresponse-lime-modules-testing/modules/
+      - aws s3 sync build/repodata/  s3://threatresponse-lime-modules-testing/repodata/
   post_build:
     commands:
-      - echo "Syncing "
+      - echo "Syncomplete "

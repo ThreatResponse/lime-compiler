@@ -1,8 +1,8 @@
 include .env_make
-NS = local
+NS = joelferrier
 VERSION ?= latest
 
-REPO = threatresponse
+REPO = lime-compiler
 NAME = lime-compiler
 INSTANCE = default
 
@@ -10,6 +10,9 @@ INSTANCE = default
 
 build:
 	docker build -t $(NS)/$(REPO):$(VERSION) .
+
+push:
+	docker push $(NS)/$(REPO):$(VERSION)
 
 shell:
 	docker run --rm --name $(NAME)-$(INSTANCE) -i -t $(PORTS) $(VOLUMES) $(ENV) $(NS)/$(REPO):$(VERSION) /bin/bash
