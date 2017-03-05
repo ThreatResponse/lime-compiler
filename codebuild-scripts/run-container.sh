@@ -9,4 +9,5 @@ docker run --rm --name lime-compiler-default \
   -e ARCHIVE_ROOT="$ARCHIVE_ROOT" \
   -e SIGNING_ARGS="$SIGNING_ARGS" \
   -e OPTIONAL_ARGS="$OPTIONAL_ARGS" \
+  -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" \
   joelferrier/lime-compiler:latest
