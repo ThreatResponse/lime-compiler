@@ -4,7 +4,7 @@ BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PARSER_SCRIPT="${BASE_DIR}/set-session-token.py"
 
 #fetch temporary session token and pass to container
-RESPONSE=$(aws sts get-session-token --duration-seconds 900)
+RESPONSE=$(curl 169.254.169.254$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI)
 echo $RESPONSE | python $PARSER_SCRIPT
 
 #run container with env vars
