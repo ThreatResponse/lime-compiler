@@ -10,6 +10,8 @@ phases:
     commands:
       - aws s3 sync s3://threatresponse-lime-modules/modules/ build/modules/
       - aws s3 sync s3://threatresponse-lime-modules/repodata/ build/repodata/
+      - aws s3 cp $S3_AES_EXPORT_URL aes_export.aes
+      - aws s3 cp $S3_GPG_EXPORT_URL gpg_export.aes
       - echo Beginning run of the lime compiler `date`
       - codebuild-scripts/run-container.sh
       - aws s3 sync build/modules/  s3://threatresponse-lime-modules-testing/modules/
