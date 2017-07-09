@@ -3,8 +3,8 @@ require 'aws-sdk'
 module LimeCompiler
   class Crypto
 
-    def initialize opts
-      @kms = Aws::KMS::Client.new(region: opts[:kms_region])
+    def initialize credentials, opts
+      @kms = Aws::KMS::Client.new(credentials: credentials, region: opts[:kms_region])
     end
 
     def kms_decrypt data, encryption_context = nil

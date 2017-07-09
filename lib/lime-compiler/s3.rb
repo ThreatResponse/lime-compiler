@@ -4,7 +4,7 @@ module LimeCompiler
   class S3
 
     def initialize opts
-      @s3 = Aws::S3::Client.new region: opts[:region]
+      @s3 = Aws::S3::Client.new opts
     end
 
     def fetch_data uri, opts = {}

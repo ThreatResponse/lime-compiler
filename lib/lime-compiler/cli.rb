@@ -24,7 +24,8 @@ module LimeCompiler
                                     aes_export: nil,
                                     gpg_export: nil,
                                     s3_region: nil },
-                        kms_opts: { kms_region: nil } }
+                        kms_opts: { kms_region: nil,
+                                    aws_profile: nil } }
 
     REQUIRED_KEYS = [:config_path]
     REQUIRED_SUBKEYS = { build_opts: [:module_dir, :archive_dir] }
@@ -66,6 +67,10 @@ module LimeCompiler
         parser.on("-a", "--archive archive/", "[Required] archive output directory") do |v|
           @opts[:repo_opts][:archive_dir] = v
           @opts[:build_opts][:archive_dir] = v
+        end
+
+        parser.on("--profile aws-profile", "aws profile name") do |v|
+          @opts[:kms_opts][:aws_profile] = v
         end
 
         parser.on("--build-all", "Rebuild existing lime modules in the build root") do |v|
