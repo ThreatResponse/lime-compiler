@@ -50,12 +50,7 @@ module LimeCompiler
 
       client = LimeCompiler::DockerClient.new(@config[:config][:docker])
 
-      if @config[:repo_opts][:gpg_sign]
-        gpg = GPG.new(@config[:gpg_opts])
-        if import_key_required_opts @config
-          gpg.import_key @config[:kms_opts]
-        end
-      end
+      gpg_client = self.gpg_client @config[:gpg_opts]
 
       repo = Repo.new(@config[:repo_opts])
       existing_modules = repo.modules @config[:repo_opts][:module_dir]
@@ -69,7 +64,7 @@ module LimeCompiler
 
       if @config[:repo_opts][:gpg_sign]
         existing_modules.each do |mod|
-          sig_path = gpg.sign(mod, overwrite: @config[:repo_opts][:sign_all])
+          sig_path = gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
           repo.generate_metadata mod, sig_path
         end
       else
@@ -108,7 +103,7 @@ module LimeCompiler
 
           if @config[:repo_opts][:gpg_sign]
             modules.each do |mod|
-              sig_path = gpg.sign(mod, overwrite: @config[:repo_opts][:sign_all])
+              sig_path = gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
               repo.generate_metadata mod, sig_path
             end
           else
@@ -130,7 +125,7 @@ module LimeCompiler
         repomd_path = repo.generate_repodata @config[:repo_opts][:module_dir]
         @@logger.debug "generated repodata #{repomd_path}"
         if @config[:repo_opts][:gpg_sign]
-          repomd_sig_path = gpg.sign(repomd_path, overwrite: true)
+          repomd_sig_path = gpg_client.sign(repomd_path, overwrite: true)
           @@logger.debug "signed repo metadata #{repomd_sig_path}"
           if @config[:repo_opts][:rm_gpg_home]
             FileUtils.rm_r @config[:repo_opts][:gpg_home]
@@ -142,6 +137,19 @@ module LimeCompiler
 
       client.cleanup_containers(delete: false)
 
+    end
+
+    def gpg_client options
+      if @config[:repo_opts][:gpg_sign]
+        gpg = GPG.new(options)
+        if import_key_required_opts @config
+          gpg.import_key @config[:kms_opts]
+        end
+      else
+        gpg = nil
+      end
+
+      gpg
     end
 
     def symbolize config
