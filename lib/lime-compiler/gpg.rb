@@ -25,14 +25,13 @@ module LimeCompiler
       @logger.level = Application.log_level
     end
 
-    def import_key kms_opts
-      credentials = Aws::SharedCredentials.new(profile_name: kms_opts[:aws_profile])
-      crypto = Crypto.new(credentials, kms_opts)
+    def import_key
+      crypto = Crypto.new
       s3 = nil
       @logger.debug "fetching aes ciphertext from #{@opts[:aes_export]}"
       if @opts[:aes_export][0..4] == "s3://"
         unless s3
-          s3 = S3.new(credentials: credentials, region: @opts[:s3_region])
+          s3 = S3.new
         end
         aes_ciphertext = s3.fetch_data(@opts[:aes_export]).unpack('m')[0]
       else
@@ -42,7 +41,7 @@ module LimeCompiler
       @logger.debug "fetching gpg ciphertext from #{@opts[:gpg_export]}"
       if @opts[:gpg_export][0..4] == "s3://"
         unless s3
-          s3 = S3.new(credentials: credentials, region: @opts[:s3_region])
+          s3 = S3.new
         end
         gpg_ciphertext = s3.fetch_data(@opts[:gpg_export]).unpack('m')[0]
       else

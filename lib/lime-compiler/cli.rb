@@ -6,6 +6,8 @@ module LimeCompiler
     DEFAULT_OPTIONS = { config: nil,
                         config_path: nil,
                         verbose: false,
+                        aws_profile: nil,
+                        aws_region: nil,
                         repo_opts: { module_dir: nil,
                                      archive_dir: nil,
                                      packager: nil,
@@ -22,10 +24,7 @@ module LimeCompiler
                         gpg_opts: { gpg_home: "~/.gnupg",
                                     gpg_id: nil,
                                     aes_export: nil,
-                                    gpg_export: nil,
-                                    s3_region: nil },
-                        kms_opts: { kms_region: nil,
-                                    aws_profile: nil } }
+                                    gpg_export: nil } }
 
     REQUIRED_KEYS = [:config_path]
     REQUIRED_SUBKEYS = { build_opts: [:module_dir, :archive_dir] }
@@ -70,7 +69,11 @@ module LimeCompiler
         end
 
         parser.on("--profile aws-profile", "aws profile name") do |v|
-          @opts[:kms_opts][:aws_profile] = v
+          @opts[:aws_profile] = v
+        end
+
+        parser.on("--region aws-region", "aws region name") do |v|
+          @opts[:aws_region] = v
         end
 
         parser.on("--build-all", "Rebuild existing lime modules in the build root") do |v|
@@ -101,14 +104,6 @@ module LimeCompiler
 
         parser.on("--rm-gpg-home", "Custom gpg home directory") do |v|
           @opts[:repo_opts][:rm_gpg_home] = v
-        end
-
-        parser.on("--kms-region region", "AWS region for KMS client instantiation") do |v|
-          @opts[:kms_opts][:kms_region] = v
-        end
-
-        parser.on("--s3-region region", "AWS region for S3 client instantiation") do |v|
-          @opts[:gpg_opts][:s3_region] = v
         end
 
         parser.on("--aes-key-export export.aes", "Path to aes key export created with gpg-setup") do |v|

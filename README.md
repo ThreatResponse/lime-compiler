@@ -21,6 +21,8 @@ Usage: lime-compiler [options]
     -c, --config config.yml          [Required] path to config file
     -m, --moduledir modules/         [Required] module output directory
     -a, --archive archive/           [Required] archive output directory
+        --profile aws-profile        aws profile name
+        --region aws-region          aws region name
         --build-all                  Rebuild existing lime modules in the build root
         --gpg-sign                   Sign compiled modules
         --sign-all                   Regenerate signatures for existing modules in build root
@@ -28,8 +30,6 @@ Usage: lime-compiler [options]
         --gpg-no-verify              Bypass gpg signature checks
         --gpg-home path/to/gpghome   Custom gpg home directory
         --rm-gpg-home                Custom gpg home directory
-        --kms-region region          AWS region for KMS client instantiation
-        --s3-region region           AWS region for S3 client instantiation
         --aes-key-export export.aes  Path to aes key export created with gpg-setup
         --gpg-key-export export.aes  Path to encrypted gpg key created with gpg-setup
         --[no-]verbose               Run verbosely

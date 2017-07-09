@@ -1,6 +1,7 @@
 require 'logger'
 require 'fileutils'
 require 'yaml'
+require 'aws-sdk'
 require_relative 'cli'
 require_relative 'compile_target'
 require_relative 'gpg'
@@ -28,7 +29,19 @@ module LimeCompiler
         @@logger.level = Logger::INFO
       end
 
-      self.validate options
+      config = self.validate options
+
+      if config[:aws_profile]
+        Aws.config.update({
+          credentials: Aws::SharedCredentials.new(profile_name: config[:aws_profile])
+        })
+      end
+
+      if config[:region]
+        Aws.config.update({region: config[:aws_region]})
+      end
+
+      config
     end
 
     def validate options
@@ -50,7 +63,7 @@ module LimeCompiler
 
       client = LimeCompiler::DockerClient.new(@config[:config][:docker])
 
-      gpg_client = self.gpg_client @config[:gpg_opts]
+      gpg_client = self.gpg_client
 
       repo = Repo.new(@config[:repo_opts])
       existing_modules = repo.modules @config[:repo_opts][:module_dir]
@@ -139,17 +152,15 @@ module LimeCompiler
 
     end
 
-    def gpg_client options
-      if @config[:repo_opts][:gpg_sign]
-        gpg = GPG.new(options)
+    def gpg_client
+      if !@gpg and @config[:repo_opts][:gpg_sign]
+        @gpg = GPG.new(@config[:gpg_opts])
         if import_key_required_opts @config
-          gpg.import_key @config[:kms_opts]
+          @gpg.import_key
         end
-      else
-        gpg = nil
       end
 
-      gpg
+      @gpg
     end
 
     def symbolize config
@@ -165,12 +176,10 @@ module LimeCompiler
     end
 
     def import_key_required_opts opts
-      kms_ok = !(opts[:kms_opts][:kms_region].nil?)
       gpg_ok = !(opts[:gpg_opts][:gpg_id].nil? and opts[:gpg_opts][:aes_export].nil? and opts[:gpg_opts][:gpg_export].nil?  )
-      #repo_ok = !(opts[:repo_opts][:gpg_sign].nil? and opts[:repo_opts][:aes_export].nil? and opts[:repo_opts][:gpg_export].nil?)
       repo_ok = !(opts[:repo_opts][:gpg_sign].nil?)
 
-      kms_ok and gpg_ok and repo_ok
+      gpg_ok and repo_ok
     end
 
     def self.log_level
