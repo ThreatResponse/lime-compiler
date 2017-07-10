@@ -60,8 +60,6 @@ module LimeCompiler
     end
 
     def run
-      gpg_client = self.gpg_client
-
       repo = Repo.new(@config[:repo_opts])
       existing_modules = repo.modules @config[:repo_opts][:module_dir]
       @@logger.debug "existing modules found: #{existing_modules}"
@@ -74,7 +72,7 @@ module LimeCompiler
 
       if @config[:repo_opts][:gpg_sign]
         existing_modules.each do |mod|
-          sig_path = gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
+          sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
           repo.generate_metadata mod, sig_path
         end
       else
@@ -113,7 +111,7 @@ module LimeCompiler
 
           if @config[:repo_opts][:gpg_sign]
             modules.each do |mod|
-              sig_path = gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
+              sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
               repo.generate_metadata mod, sig_path
             end
           else
@@ -135,7 +133,7 @@ module LimeCompiler
         repomd_path = repo.generate_repodata @config[:repo_opts][:module_dir]
         @@logger.debug "generated repodata #{repomd_path}"
         if @config[:repo_opts][:gpg_sign]
-          repomd_sig_path = gpg_client.sign(repomd_path, overwrite: true)
+          repomd_sig_path = self.gpg_client.sign(repomd_path, overwrite: true)
           @@logger.debug "signed repo metadata #{repomd_sig_path}"
           if @config[:repo_opts][:rm_gpg_home]
             FileUtils.rm_r @config[:repo_opts][:gpg_home]
