@@ -89,43 +89,15 @@ module LimeCompiler
         distro = @config[:config][:distributions][distro_name.to_sym]
 
         @@logger.info "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
-        c = self.docker_client.container(container_name, image[:image], image[:tag],
-                               start: true, reuse: true)
+        container = self.docker_client.container(container_name, image[:image],
+                                                 image[:tag], start: true,
+                                                 reuse: true)
 
-        local_opts = { name: container_name, archive_name: name,
-                       distro: distro, container: c,
-                       existing_modules: existing_modules }
+        container_opts = { name: container_name, archive_name: name,
+                           distro: distro, container: container,
+                           existing_modules: existing_modules }
 
-        target = CompileTarget.new(local_opts.merge!(@config[:build_opts]))
-
-        begin
-          target.pre_actions
-          target.update_sources
-          target.install_dependencies
-          target.clone_lime
-          target.create_directories
-          target.compile_lime
-          modules = target.write_archive
-          @@logger.debug "exported kernel modules: #{modules}"
-
-          if @config[:repo_opts][:gpg_sign]
-            modules.each do |mod|
-              sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
-              self.repo.generate_metadata mod, sig_path
-            end
-          else
-            sig_path = nil
-            modules.each do |mod|
-              self.repo.generate_metadata mod, sig_path
-            end
-          end
-
-        rescue Exception => e
-          errors.append(e)
-          @@logger.fatal e.message
-          @@logger.debug e.backtrace.inspect
-        end
-        self.docker_client.cleanup_container(c, delete: false)
+        self.compile_lime container, container_opts, errors
       end
 
       if errors.empty?
@@ -136,6 +108,41 @@ module LimeCompiler
 
       self.docker_client.cleanup_containers(delete: false)
 
+    end
+
+    def compile_lime container, container_opts, errors
+      target = CompileTarget.new(container_opts.merge!(@config[:build_opts]))
+
+      begin
+        target.pre_actions
+        target.update_sources
+        target.install_dependencies
+        target.clone_lime
+        target.create_directories
+        target.compile_lime
+        modules = target.write_archive
+        @@logger.debug "exported kernel modules: #{modules}"
+
+        if @config[:repo_opts][:gpg_sign]
+          modules.each do |mod|
+            sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
+            self.repo.generate_metadata mod, sig_path
+          end
+        else
+          sig_path = nil
+          modules.each do |mod|
+            self.repo.generate_metadata mod, sig_path
+          end
+        end
+
+      rescue Exception => e
+        errors.append(e)
+        @@logger.fatal e.message
+        @@logger.debug e.backtrace.inspect
+      end
+      self.docker_client.cleanup_container(container, delete: false)
+
+      errors
     end
 
     def generate_repodata
