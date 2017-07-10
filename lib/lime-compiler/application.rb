@@ -60,9 +60,6 @@ module LimeCompiler
     end
 
     def run
-
-      client = LimeCompiler::DockerClient.new(@config[:config][:docker])
-
       gpg_client = self.gpg_client
 
       repo = Repo.new(@config[:repo_opts])
@@ -71,7 +68,7 @@ module LimeCompiler
 
       @config[:config][:images].each do |name, image|
         @@logger.info "pulling latest for #{image[:image]}:#{image[:tag]}"
-        client.pull(image[:image], image[:tag])
+        self.docker_client.pull(image[:image], image[:tag])
       end
 
 
@@ -95,7 +92,7 @@ module LimeCompiler
         distro = @config[:config][:distributions][distro_name.to_sym]
 
         @@logger.info "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
-        c = client.container(container_name, image[:image], image[:tag],
+        c = self.docker_client.container(container_name, image[:image], image[:tag],
                                start: true, reuse: true)
 
         local_opts = { name: container_name, archive_name: name,
@@ -131,7 +128,7 @@ module LimeCompiler
           @@logger.fatal e.message
           @@logger.debug e.backtrace.inspect
         end
-        client.cleanup_container(c, delete: false)
+        self.docker_client.cleanup_container(c, delete: false)
       end
 
       if errors.empty?
@@ -148,8 +145,16 @@ module LimeCompiler
         @@logger.fatal "refusing to generate repo metadata due to the following errors #{errors}"
       end
 
-      client.cleanup_containers(delete: false)
+      self.docker_client.cleanup_containers(delete: false)
 
+    end
+
+    def docker_client
+      unless @docker_client
+        @docker_client = LimeCompiler::DockerClient.new(@config[:config][:docker])
+      end
+
+      @docker_client
     end
 
     def gpg_client
