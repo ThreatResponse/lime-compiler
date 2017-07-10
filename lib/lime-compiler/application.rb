@@ -60,8 +60,7 @@ module LimeCompiler
     end
 
     def run
-      repo = Repo.new(@config[:repo_opts])
-      existing_modules = repo.modules @config[:repo_opts][:module_dir]
+      existing_modules = self.repo.modules
       @@logger.debug "existing modules found: #{existing_modules}"
 
       @config[:config][:images].each do |name, image|
@@ -73,12 +72,12 @@ module LimeCompiler
       if @config[:repo_opts][:gpg_sign]
         existing_modules.each do |mod|
           sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
-          repo.generate_metadata mod, sig_path
+          self.repo.generate_metadata mod, sig_path
         end
       else
         sig_path = nil
         existing_modules.each do |mod|
-          repo.generate_metadata mod, sig_path
+          self.repo.generate_metadata mod, sig_path
         end
       end
 
@@ -112,12 +111,12 @@ module LimeCompiler
           if @config[:repo_opts][:gpg_sign]
             modules.each do |mod|
               sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
-              repo.generate_metadata mod, sig_path
+              self.repo.generate_metadata mod, sig_path
             end
           else
             sig_path = nil
             modules.each do |mod|
-              repo.generate_metadata mod, sig_path
+              self.repo.generate_metadata mod, sig_path
             end
           end
 
@@ -130,7 +129,7 @@ module LimeCompiler
       end
 
       if errors.empty?
-        repomd_path = repo.generate_repodata @config[:repo_opts][:module_dir]
+        repomd_path = self.repo.generate_repodata @config[:repo_opts][:module_dir]
         @@logger.debug "generated repodata #{repomd_path}"
         if @config[:repo_opts][:gpg_sign]
           repomd_sig_path = self.gpg_client.sign(repomd_path, overwrite: true)
@@ -153,6 +152,14 @@ module LimeCompiler
       end
 
       @docker_client
+    end
+
+    def repo
+      unless @repo
+        @repo = Repo.new(@config[:repo_opts])
+      end
+
+      @repo
     end
 
     def gpg_client
