@@ -63,11 +63,7 @@ module LimeCompiler
       existing_modules = self.repo.modules
       @@logger.debug "existing modules found: #{existing_modules}"
 
-      @config[:config][:images].each do |name, image|
-        @@logger.info "pulling latest for #{image[:image]}:#{image[:tag]}"
-        self.docker_client.pull(image[:image], image[:tag])
-      end
-
+      self.pull_images
 
       if @config[:repo_opts][:gpg_sign]
         existing_modules.each do |mod|
@@ -107,7 +103,13 @@ module LimeCompiler
       end
 
       self.docker_client.cleanup_containers(delete: false)
+    end
 
+    def pull_images
+      @config[:config][:images].each do |name, image|
+        @@logger.info "pulling latest for #{image[:image]}:#{image[:tag]}"
+        self.docker_client.pull(image[:image], image[:tag])
+      end
     end
 
     def compile_lime container, container_opts, errors
