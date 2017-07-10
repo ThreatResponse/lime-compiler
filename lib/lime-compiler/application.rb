@@ -67,7 +67,9 @@ module LimeCompiler
 
       if @config[:repo_opts][:gpg_sign]
         existing_modules.each do |mod|
-          sig_path = self.gpg_client.sign(mod, overwrite: @config[:repo_opts][:sign_all])
+          sig_path = self.gpg_client.sign(
+            mod, overwrite: @config[:repo_opts][:sign_all]
+          )
           self.repo.generate_metadata mod, sig_path
         end
       else
@@ -84,7 +86,9 @@ module LimeCompiler
         distro_name = image[:distribution]
         distro = @config[:config][:distributions][distro_name.to_sym]
 
-        @@logger.info "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
+        @@logger.info(
+          "creating container #{container_name} from #{image[:image]}:#{image[:tag]}"
+        )
         container = self.docker_client.container(container_name, image[:image],
                                                  image[:tag], start: true,
                                                  reuse: true)
@@ -99,7 +103,9 @@ module LimeCompiler
       if errors.empty?
         self.generate_repodata
       else
-        @@logger.fatal "refusing to generate repo metadata due to the following errors #{errors}"
+        @@logger.fatal(
+          "refusing to generate repo metadata due to the following errors #{errors}"
+        )
       end
 
       self.docker_client.cleanup_containers(delete: false)
