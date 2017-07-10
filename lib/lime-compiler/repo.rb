@@ -11,6 +11,7 @@ module LimeCompiler
       @opts = opts
       @primary_metadata = {}
       @repo_metadata = {}
+      @base_path = opts[:module_dir].chomp("/")
       @metadata_dir = "repodata"
       @module_dir = "modules"
       if opts[:gpg_home]
@@ -26,7 +27,7 @@ module LimeCompiler
       end
       @logger.level = Application.log_level
 
-      setup_directories @opts[:module_dir]
+      setup_directories @base_path
     end
 
     def setup_directories path
@@ -43,9 +44,9 @@ module LimeCompiler
       end
     end
 
-    def modules path
-      module_path = "#{path.chomp("/")}/#{@module_dir}"
-      Dir["#{module_path.chomp("/")}/*.ko"].map {|val| File.absolute_path(val) }
+    def modules
+      module_path = "#{@base_path}/#{@module_dir}"
+      Dir["#{module_path.chomp("/")}/*.ko"].map { |val| File.absolute_path(val) }
     end
 
     def generate_metadata mod_path, sig_path
