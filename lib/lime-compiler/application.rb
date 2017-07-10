@@ -129,21 +129,25 @@ module LimeCompiler
       end
 
       if errors.empty?
-        repomd_path = self.repo.generate_repodata @config[:repo_opts][:module_dir]
-        @@logger.debug "generated repodata #{repomd_path}"
-        if @config[:repo_opts][:gpg_sign]
-          repomd_sig_path = self.gpg_client.sign(repomd_path, overwrite: true)
-          @@logger.debug "signed repo metadata #{repomd_sig_path}"
-          if @config[:repo_opts][:rm_gpg_home]
-            FileUtils.rm_r @config[:repo_opts][:gpg_home]
-          end
-        end
+        self.generate_repodata
       else
         @@logger.fatal "refusing to generate repo metadata due to the following errors #{errors}"
       end
 
       self.docker_client.cleanup_containers(delete: false)
 
+    end
+
+    def generate_repodata
+      repomd_path = self.repo.generate_repodata @config[:repo_opts][:module_dir]
+      @@logger.debug "generated repodata #{repomd_path}"
+      if @config[:repo_opts][:gpg_sign]
+        repomd_sig_path = self.gpg_client.sign(repomd_path, overwrite: true)
+        @@logger.debug "signed repo metadata #{repomd_sig_path}"
+        if @config[:repo_opts][:rm_gpg_home]
+          FileUtils.rm_r @config[:repo_opts][:gpg_home]
+        end
+      end
     end
 
     def docker_client
