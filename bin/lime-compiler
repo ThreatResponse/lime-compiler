@@ -6,4 +6,4 @@ rescue LoadError
   require_relative '../lib/lime-compiler/all'
 end
 
-LimeCompiler::Application.new.run
+LimeCompiler::Cli.new.run
