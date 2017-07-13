@@ -7,3 +7,7 @@ gem 'gpgme'
 gem 'aws-sdk'
 gem 'commander-fastlane'
 gem 'inifile'
+
+group :test do
+  gem 'rspec'
+end
