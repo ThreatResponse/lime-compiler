@@ -8,6 +8,13 @@ gem 'aws-sdk'
 gem 'commander-fastlane'
 gem 'inifile'
 
-group :test do
+group :test, :development do
   gem 'rspec'
+end
+
+group :development do
+  gem 'rubocop'
+  gem 'guard'
+  gem 'guard-rubocop'
+  gem 'guard-rspec'
 end
