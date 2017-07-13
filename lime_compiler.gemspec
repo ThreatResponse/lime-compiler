@@ -12,7 +12,9 @@ Gem::Specification.new do |gem|
   gem.summary               = %q{Builds LiME kernel modules with docker}
   gem.homepage              = "https://github.com/ThreatResponse/lime-compiler"
 
-  gem.files                 = `git ls-files -z`.split("\x0")
+  gem.files                 = `git ls-files -z`.split("\x0").reject do |f|
+    f.match(%r{^(archive|build|spec)/})
+  end
   gem.executables           = %w[lime-compiler gpg-setup]
   gem.name                  = "lime-compiler"
   gem.require_paths         = ["lib"]
