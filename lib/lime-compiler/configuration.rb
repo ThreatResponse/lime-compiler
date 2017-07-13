@@ -43,7 +43,12 @@ module LimeCompiler
     end
 
     def to_h
-      @conf.to_h
+      hash = @conf.to_h
+      hash.each do |key, value|
+        if value.instance_of? OpenStruct
+          hash[key] = value.to_h
+        end
+      end
     end
 
     def user_config=(value)
