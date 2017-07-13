@@ -46,25 +46,6 @@ module LimeCompiler
       @conf.to_h
     end
 
-    def defaults
-      defaults = OpenStruct.new({
-        common: common_opts,
-        docker: docker_opts,
-        aws: aws_opts,
-        build: build_opts,
-        repo: repo_opts,
-        repo_signing: repo_signing_opts,
-      })
-
-      config = self.load_config
-
-      if config
-        Configuration.merge(defaults, config)
-      else
-        defaults
-      end
-    end
-
     def user_config=(value)
       @user_config = value
       reload!
@@ -132,6 +113,25 @@ module LimeCompiler
 
     protected
 
+      def defaults
+        default_config = OpenStruct.new({
+          common: common_opts,
+          docker: docker_opts,
+          aws: aws_opts,
+          build: build_opts,
+          repo: repo_opts,
+          repo_signing: repo_signing_opts,
+        })
+
+        config = self.config_from_default_location
+
+        if config
+          Configuration.merge(default_config, config)
+        else
+          default_config
+        end
+      end
+
       def get
         @conf
       end
@@ -144,7 +144,7 @@ module LimeCompiler
         end
       end
 
-      def load_config
+      def config_from_default_location
         config = nil
         CONFIG_LOCATIONS.each do |path|
           if File.file?(File.expand_path(path))
