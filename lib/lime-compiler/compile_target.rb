@@ -32,7 +32,7 @@ module LimeCompiler
       unless @distro[:pre_actions].nil?
         @logger.info "running pre actions for #{@name}"
         @distro[:pre_actions].each do |action|
-          resp = @container.exec(action.split(" "), tty: true)
+          resp = @container.exec(action.split(' '), tty: true)
           @logger.debug resp[0]
         end
       end
@@ -53,24 +53,24 @@ module LimeCompiler
 
     def clone_lime
       @logger.info "cloning LiME to /tmp/LiME for #{@name}"
-      resp = @container.exec("rm -rf /tmp/LiME".split(" ") , tty: true)
+      resp = @container.exec('rm -rf /tmp/LiME'.split(' ') , tty: true)
       @logger.debug resp
 
-      command = "git clone --quiet https://github.com/504ensicsLabs/LiME.git /tmp/LiME".split(" ")
+      command = 'git clone --quiet https://github.com/504ensicsLabs/LiME.git /tmp/LiME'.split(' ')
       resp = @container.exec(command , tty: true)
       @logger.debug resp
     end
 
     def create_directories
       @logger.info "creating module output dir /tmp/modules for #{@name}"
-      command = "mkdir -p /tmp/modules".split(" ")
+      command = 'mkdir -p /tmp/modules'.split(' ')
       resp = @container.exec(command , tty: true)
       @logger.debug resp
     end
 
     def compile_lime
       @logger.info "compiling LiME for #{@name}"
-      resp = @container.exec(@distro[:kernel_packages].split(" "), tty: true)
+      resp = @container.exec(@distro[:kernel_packages].split(' '), tty: true)
       @logger.debug resp
       @packages = kernel_packages(resp[0])
       @logger.debug @packages
@@ -120,10 +120,10 @@ module LimeCompiler
     def compile_for kernel
       @logger.debug "compiling lime for #{kernel}"
       command = "make -C #{@source_dir}/#{kernel}#{@source_postfix} M=/tmp/LiME/src"
-      resp = @container.exec(command.split(" "), tty: true)
+      resp = @container.exec(command.split(' '), tty: true)
       @logger.debug resp
       command = "mv /tmp/LiME/src/lime.ko /tmp/modules/lime-#{kernel}.ko"
-      resp = @container.exec(command.split(" "), tty: true)
+      resp = @container.exec(command.split(' '), tty: true)
       @logger.debug resp
     end
 
@@ -131,7 +131,7 @@ module LimeCompiler
       archive_path = File.join(File.expand_path(@archive_dir),@archive_name)
       @logger.info "writing modules to file #{archive_path}"
       File.open(archive_path, 'wb') do |file|
-        @container.copy("/tmp/modules") do |chunk|
+        @container.copy('/tmp/modules') do |chunk|
           file.write(chunk)
         end
       end
@@ -170,7 +170,7 @@ module LimeCompiler
         # some blocks of text contain multiple lines
         text.split("\r\n").each do |line|
           line = line.gsub("\r\n", '').strip.chomp
-          tokens = line.split(" ")
+          tokens = line.split(' ')
           if tokens[match_position] =~ pattern
             package = tokens[package_position]
             packages << package

@@ -9,7 +9,7 @@ module LimeCompiler
 
     DEFAULT_OPTIONS = { aws_region: nil,
                         aes: {
-                          alg: "AES-256-CBC" },
+                          alg: 'AES-256-CBC' },
                         kms: {
                           key_id: nil,
                           key_spec: 'AES_256' },
@@ -28,30 +28,30 @@ module LimeCompiler
         @opts = DEFAULT_OPTIONS
 
         parser = OptionParser.new
-        parser.banner = "gpg-setup: Encrypts GPG key for storage"
+        parser.banner = 'gpg-setup: Encrypts GPG key for storage'
 
-        parser.on("-h", "--help", "Show this help message") do ||
+        parser.on('-h', '--help', 'Show this help message') do ||
           puts parser
           help = true
         end
 
-        parser.on("--aws-region region", "aws region") do |v|
+        parser.on('--aws-region region', 'aws region') do |v|
           @opts[:aws_region] = v
         end
 
-        parser.on("--kms-id id", "kms key id") do |v|
+        parser.on('--kms-id id', 'kms key id') do |v|
           @opts[:kms][:key_id] = v
         end
 
-        parser.on("--gpg-key-path path", "path to gpg key") do |v|
+        parser.on('--gpg-key-path path', 'path to gpg key') do |v|
           @opts[:gpg][:key_path] = v
         end
 
-        parser.on("--gpg-key-id fingerprint", "gpg key fingerprint") do |v|
+        parser.on('--gpg-key-id fingerprint', 'gpg key fingerprint') do |v|
           @opts[:gpg][:fingerprint] = v
         end
 
-        parser.on("--gpg-key-passphrase pass", "gpg key passphrase") do |v|
+        parser.on('--gpg-key-passphrase pass', 'gpg key passphrase') do |v|
           @opts[:gpg][:passphrase] = v
         end
 

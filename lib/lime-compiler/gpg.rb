@@ -29,7 +29,7 @@ module LimeCompiler
       crypto = Crypto.new
       s3 = nil
       @logger.debug "fetching aes ciphertext from #{@opts[:aes_export]}"
-      if @opts[:aes_export][0..4] == "s3://"
+      if @opts[:aes_export][0..4] == 's3://'
         unless s3
           s3 = S3.new
         end
@@ -39,7 +39,7 @@ module LimeCompiler
       end
 
       @logger.debug "fetching gpg ciphertext from #{@opts[:gpg_export]}"
-      if @opts[:gpg_export][0..4] == "s3://"
+      if @opts[:gpg_export][0..4] == 's3://'
         unless s3
           s3 = S3.new
         end
@@ -48,11 +48,11 @@ module LimeCompiler
         gpg_ciphertext = File.read(@opts[:gpg_export]).unpack('m')[0]
       end
 
-      @logger.debug "decrypting aes initialization vector with KMS"
+      @logger.debug 'decrypting aes initialization vector with KMS'
       aes_info = YAML::load(crypto.kms_decrypt aes_ciphertext)
-      @logger.debug "decrypting aes key with KMS"
-      aes_key = crypto.kms_decrypt aes_info[:dek], {"gpg-fingerprint" => @opts[:gpg_id]}
-      @logger.debug "decrypting gpg key with openssl"
+      @logger.debug 'decrypting aes key with KMS'
+      aes_key = crypto.kms_decrypt aes_info[:dek], {'gpg-fingerprint' => @opts[:gpg_id]}
+      @logger.debug 'decrypting gpg key with openssl'
       gpg_data = YAML::load(crypto.aes_decrypt gpg_ciphertext, aes_key, aes_info[:aes_iv])
       @logger.info "importing gpg key: #{@opts[:gpg_id]} from #{@opts[:gpg_export]}"
       @passphrase = gpg_data[:passphrase]
@@ -66,7 +66,7 @@ module LimeCompiler
         @logger.debug "signing #{path} with #{@opts[:gpg_id]}"
         File.open(path, 'r') do |f|
           contents = f.read
-          File.open(sigpath, "w+") do |sigfile|
+          File.open(sigpath, 'w+') do |sigfile|
             sig = @crypto.sign contents, { mode: GPGME::SIG_MODE_DETACH,
                                            signer: @opts[:gpg_id],
                                            passphrase_callback: method(:passfunc),
@@ -82,7 +82,7 @@ module LimeCompiler
         else
           @logger.debug "signature verification failed for #{path}, #{sigpath}"
           #TODO: raise an exception
-          return ""
+          return ''
         end
       end
     end

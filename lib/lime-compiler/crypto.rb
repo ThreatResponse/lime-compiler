@@ -15,7 +15,7 @@ module LimeCompiler
 
     def aes_decrypt ciphertext, key, iv
       #TODO: set this up as a defualt option?
-      alg = "AES-256-CBC"
+      alg = 'AES-256-CBC'
       cipher = OpenSSL::Cipher::Cipher.new(alg)
       cipher.decrypt
       cipher.key = key

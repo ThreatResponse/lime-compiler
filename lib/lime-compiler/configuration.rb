@@ -205,7 +205,7 @@ module LimeCompiler
           sign_all: false,
           verify_existing: true,
           gpg_fingerprint: nil,
-          gpg_home: "~/.gnupg",
+          gpg_home: '~/.gnupg',
           remove_gpg_home: nil,
           aes_key_import_path: nil,
           gpg_key_import_path: nil,

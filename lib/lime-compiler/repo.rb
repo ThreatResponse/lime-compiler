@@ -11,9 +11,9 @@ module LimeCompiler
       @opts = opts
       @primary_metadata = {}
       @repo_metadata = {}
-      @base_path = opts[:module_dir].chomp("/")
-      @metadata_dir = "repodata"
-      @module_dir = "modules"
+      @base_path = opts[:module_dir].chomp('/')
+      @metadata_dir = 'repodata'
+      @module_dir = 'modules'
       if opts[:gpg_home]
         GPGME::Engine.home_dir = opts[:gpg_home]
       end
@@ -53,15 +53,15 @@ module LimeCompiler
 
       metadata = {}
 
-      module_name = mod_path.split("/")[-1]
+      module_name = mod_path.split('/')[-1]
       if sig_path.nil?
-        signature_path = ""
+        signature_path = ''
       else
         signature_path = "#{@module_dir}/#{sig_path.split("/")[-1]}"
       end
 
       metadata[:name]      = module_name
-      metadata[:arch]      = "x86_64" # TODO: make this dynamic
+      metadata[:arch]      = 'x86_64' # TODO: make this dynamic
       metadata[:checksum]  = self.sha256 mod_path
       metadata[:version]   = self.mod_name module_name
       metadata[:packager]  = @opts[:packager]
@@ -74,7 +74,7 @@ module LimeCompiler
     end
 
     def generate_repodata base
-      @logger.debug "checking for existing repomd.xml before overwrite"
+      @logger.debug 'checking for existing repomd.xml before overwrite'
       self.check_repomd base
 
       primary_path = self.write_primary_metadata base
@@ -90,7 +90,7 @@ module LimeCompiler
       repodata = Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
         xml.metadata {
           xml.revision Time.now.to_i
-          xml.data(type: "primary") {
+          xml.data(type: 'primary') {
             xml.checksum self.sha256 gzip_path
             xml.open_checksum primary_checksum
             xml.location(href: "#{@metadata_dir}/#{gzip_filename}")
@@ -114,10 +114,10 @@ module LimeCompiler
     end
 
     def rename path, checksum
-      new_path = path.split("/")
+      new_path = path.split('/')
       new_filename = "#{checksum}-#{new_path[-1]}"
       new_path[-1] = new_filename
-      new_path = new_path.join("/")
+      new_path = new_path.join('/')
       @logger.debug "renaming #{path} to #{new_path}"
       File.rename(path, new_path)
 
@@ -142,7 +142,7 @@ module LimeCompiler
       primary = Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
         xml.modules {
           @primary_metadata.each do |k, v|
-            xml.module(type: "lime") {
+            xml.module(type: 'lime') {
               xml.name v[:name]
               xml.arch v[:arch]
               xml.checksum v[:checksum]
@@ -185,11 +185,11 @@ module LimeCompiler
           end
 
         else
-          @logger.debug "gpg signing disabled, skipping check of repomd.xml signature"
+          @logger.debug 'gpg signing disabled, skipping check of repomd.xml signature'
         end
 
         # expand base directory to fully qualified path
-        base = File.expand_path(base).chomp("/")
+        base = File.expand_path(base).chomp('/')
 
         repomd_xml = File.open(repomd_path, 'rb') { |f| Nokogiri::XML(f) }
         repomd = Hash.from_xml(repomd_xml.to_s)
@@ -236,7 +236,7 @@ module LimeCompiler
           @logger.debug "found #{mod_path} in existing primary.xml"
 
           # verify module signature if present
-          if mod['signature']['href'] != ""
+          if mod['signature']['href'] != ''
             @logger.debug "verifying module signature #{mod_path}"
             sig_path = "#{base}/#{mod['location']['href']}.sig"
 
@@ -272,8 +272,8 @@ module LimeCompiler
 
     def mod_name mod
       name = mod
-      ["lime-", ".ko"].each do |s|
-        name = name.gsub(s, "")
+      ['lime-', '.ko'].each do |s|
+        name = name.gsub(s, '')
       end
 
       name
