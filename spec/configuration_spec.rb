@@ -1,3 +1,4 @@
+require 'tempfile'
 require 'lime-compiler/configuration'
 
 describe LimeCompiler::Configuration do
@@ -76,6 +77,33 @@ describe LimeCompiler::Configuration do
               expect(config_hash[section].key?(key.to_sym)).to eq(true)
             end
           end
+        end
+      end
+    end
+  end
+
+  describe '.from_ini' do
+    describe "a syntactically correct configuration file" do
+      user_conf_verbose = true
+      user_conf_debug = true
+
+      user_conf = Tempfile.new('user-config')
+      user_conf << "[common] \n"
+      user_conf << "verbose = #{user_conf_verbose}\n"
+      user_conf << "debug = #{user_conf_debug}\n"
+      user_conf.flush
+
+      it "should be loadable" do
+        config = LimeCompiler::Configuration.from_ini(user_conf.path)
+        expect(config).not_to eq(nil)
+      end
+
+      context "loaded from disk" do
+        config = LimeCompiler::Configuration.from_ini(user_conf.path)
+
+        it "should contain configs from the file" do
+          expect(config.common.verbose).to eq(user_conf_verbose)
+          expect(config.common.debug).to eq(user_conf_debug)
         end
       end
     end
