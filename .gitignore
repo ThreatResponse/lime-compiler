@@ -7,3 +7,4 @@ build/*
 *.gem
 tmp/*
 .env_make
+coverage

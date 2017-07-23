@@ -10,6 +10,7 @@ gem 'nokogiri'
 
 group :test, :development do
   gem 'rspec'
+  gem 'simplecov'
 end
 
 group :development do
