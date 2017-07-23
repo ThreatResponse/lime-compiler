@@ -1,7 +1,6 @@
 require 'lime-compiler/configuration'
 
 describe LimeCompiler::Configuration do
-
   context 'creating' do
     context 'given a new configuration' do
       config = LimeCompiler::Configuration.new
@@ -53,7 +52,6 @@ describe LimeCompiler::Configuration do
 
   describe '#to_h' do
     context 'given a new configuration' do
-
       config = LimeCompiler::Configuration.new
 
       it 'it responds to #to_h' do
@@ -79,9 +77,7 @@ describe LimeCompiler::Configuration do
             end
           end
         end
-
       end
     end
   end
-
 end

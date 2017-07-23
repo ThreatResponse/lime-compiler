@@ -6,17 +6,19 @@ require 'yaml'
 
 module LimeCompiler
   class GPGSetupCli
-
     DEFAULT_OPTIONS = { aws_region: nil,
                         aes: {
-                          alg: 'AES-256-CBC' },
+                          alg: 'AES-256-CBC'
+                        },
                         kms: {
                           key_id: nil,
-                          key_spec: 'AES_256' },
+                          key_spec: 'AES_256'
+                        },
                         gpg: {
                           key_path: nil,
                           fingerprint: nil,
-                          passphrase: nil } }
+                          passphrase: nil
+                        } }
 
     def initialize
       @opts = {}
@@ -57,7 +59,7 @@ module LimeCompiler
 
         begin
           parser.parse!
-        rescue Exception => e
+        rescue StandardError => e
           puts e.message
           puts parser
           exit(1)
@@ -72,8 +74,7 @@ module LimeCompiler
   end
 
   class GPGSetup
-
-    def initialize opts
+    def initialize(opts)
       @opts = opts
       @kms = Aws::KMS::Client.new(region: @opts[:aws_region])
       @aes = OpenSSL::Cipher.new(@opts[:aes][:alg])
@@ -82,28 +83,28 @@ module LimeCompiler
       @ggp_data = nil
     end
 
-    def export_aes path
+    def export_aes(path)
       plaintext = { dek: dek.ciphertext_blob,
                     aes_iv: iv }
       ciphertext = kms_encrypt plaintext.to_yaml
       File.open(path, 'w+') { |f| f.write([ciphertext.ciphertext_blob].pack('m')) }
     end
 
-    def export_gpg path
+    def export_gpg(path)
       plaintext = { gpg_key: gpg_key,
                     passphrase: @opts[:gpg][:passphrase] }
       ciphertext = aes_encrypt plaintext.to_yaml
       File.open(path, 'w+') { |f| f.write([ciphertext].pack('m')) }
     end
 
-    def aes_encrypt data
+    def aes_encrypt(data)
       @aes.encrypt
       @aes.key = dek.plaintext
       @aes.iv = iv
       @aes.update(data) + @aes.final
     end
 
-    def kms_encrypt data
+    def kms_encrypt(data)
       @kms.encrypt(key_id: @opts[:kms][:key_id], plaintext: data)
     end
 
@@ -121,17 +122,11 @@ module LimeCompiler
     end
 
     def iv
-      unless @iv
-        @iv = @aes.random_iv
-      end
-      @iv
+      @iv || @aes.random_iv
     end
 
     def gpg_key
-      unless @gpg_data
-        @gpg_data = File.read(@opts[:gpg][:key_path])
-      end
-      @gpg_data
+      @gpg_data || File.read(@opts[:gpg][:key_path])
     end
   end
 end

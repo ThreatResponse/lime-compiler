@@ -1,0 +1,36 @@
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Metrics/ClassLength:
+  CountComments: false
+  Max: 300
+
+Metrics/MethodLength:
+  CountComments: false
+  Max: 50
+
+Metrics/ModuleLength:
+  CountComments: false
+  Max: 100
+
+Metrics/LineLength:
+  Max: 90
+  IgnoredPatterns: ['\s#']
+
+Documentation:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 50
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - 'Guardfile'
+    - 'spec/*.rb'
+    - 'bin/gpg-setup'

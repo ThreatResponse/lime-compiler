@@ -1,5 +1,5 @@
-directories %w(bin lib spec) \
-  .select{|d| Dir.exists?(d) ? d : UI.warning("Directory #{d} does not exist")}
+#directories %w(bin lib spec) \
+#  .select{|d| Dir.exists?(d) ? d : UI.warning("Directory #{d} does not exist")}
 
 ## Note: if you are using the `directories` clause above and you are not
 ## watching the project directory ('.'), then you will want to move
