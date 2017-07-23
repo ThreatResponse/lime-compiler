@@ -11,6 +11,8 @@ module LimeCompiler
       program :version, LimeCompiler::VERSION
       program :description, 'lime kernel module build system'
 
+      default_command :help
+
       config = Configuration.new
 
       global_option('--config PATH  Specify non-default config file.') do |path|
