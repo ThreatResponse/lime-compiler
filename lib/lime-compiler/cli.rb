@@ -18,12 +18,12 @@ module LimeCompiler
       global_option('--config PATH  Specify non-default config file.') do |path|
         config.user_config = path
       end
-      # NOTE: seems to be a bug if both verbose and debug are specified (ordering matters) treating second flag as value of arg?
-      global_option('--verbose      Log INFO level messages') do
+
+      global_option('--verbose') do
         config.set_flag(:verbose, true)
       end
-      # NOTE: seems to be a bug if both verbose and debug are specified (ordering matters) treating second flag as value of arg?
-      global_option('--debug        Log DEBUG level messages') do
+
+      global_option('--debug') do
         config.set_flag(:debug, true)
       end
 
