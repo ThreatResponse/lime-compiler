@@ -8,3 +8,4 @@ build/*
 tmp/*
 .env_make
 coverage
+.lime-compiler.conf
