@@ -1,5 +1,6 @@
 require 'commander'
 require_relative 'version'
+require_relative 'cmds/all'
 require_relative 'configuration'
 
 module LimeCompiler
@@ -33,24 +34,7 @@ module LimeCompiler
 
         # c.action do |args, options|
         c.action do |_, _|
-          say("\nlime-compiler configuration:")
-          config.to_h.each do |section, section_config|
-            say("\n[<%= color('#{section}', :blue) %>]")
-            section_config.to_h.each do |key, value|
-              value ||= 'Not Configured'
-              if config.default?(section, key)
-                value = "#{value} <%= color('[Default]', :bold) %>"
-              end
-              say("<%= color('#{key}', :green) %> = #{value}")
-            end
-          end
-
-          say("\nConfiguration is generated from the following sources:")
-          say("\n  1. command line flags")
-          say('  2. environment variables [NOTE: unimplemented]')
-          say('  3. user specified config file: `--config` option')
-          say('  4. default config file `~/.lime-compiler.conf`')
-          say('  5. default bundled configuration values')
+          Configure.list(config)
         end
       end
 
