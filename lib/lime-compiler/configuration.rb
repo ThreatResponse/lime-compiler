@@ -65,6 +65,20 @@ module LimeCompiler
       @conf[section][key] == send("#{section}_opts")[key]
     end
 
+    def merge!(config)
+      CONFIG_SECTIONS.each do |section|
+        @conf[section] = OpenStruct.new(
+          if config.send(section).nil?
+            @conf[section].to_h
+          else
+            @conf[section].to_h.merge(config.send(section).to_h)
+          end
+        )
+      end
+
+      @conf
+    end
+
     def self.from_ini(path)
       return unless File.file?(File.expand_path(path))
       ini_file = IniFile.load(File.expand_path(path))
@@ -80,20 +94,6 @@ module LimeCompiler
       end
 
       config
-    end
-
-    def merge!(config)
-      CONFIG_SECTIONS.each do |section|
-        @conf[section] = OpenStruct.new(
-          if config.send(section).nil?
-            @conf[section].to_h
-          else
-            @conf[section].to_h.merge(config.send(section).to_h)
-          end
-        )
-      end
-
-      @conf
     end
 
     protected
