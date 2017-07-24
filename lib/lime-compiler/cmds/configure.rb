@@ -10,7 +10,7 @@ module LimeCompiler
                    "  4. default config file `~/.lime-compiler.conf`\n"\
                    "  5. default bundled configuration values\n".freeze
 
-    def self.list(config)
+    def self.print(config)
       say("\nlime-compiler configuration:")
       config.to_h.each do |section, section_config|
         say("\n[<%= color('#{section}', :blue) %>]")

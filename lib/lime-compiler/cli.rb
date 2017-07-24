@@ -28,13 +28,13 @@ module LimeCompiler
         config.set_flag(:debug, true)
       end
 
-      command :'configure list' do |c|
-        c.syntax = 'configure list'
+      command :'configure print' do |c|
+        c.syntax = 'configure print'
         c.description = 'Inspect lime-compiler options'
 
         # c.action do |args, options|
         c.action do |_, _|
-          Configure.list(config)
+          Configure.print(config)
         end
       end
 
