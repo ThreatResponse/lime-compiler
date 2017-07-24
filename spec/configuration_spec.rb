@@ -38,7 +38,7 @@ describe LimeCompiler::Configuration do
     context "given name ':verbose' and value 'true'" do
       config = LimeCompiler::Configuration.new
       it 'stores the flag' do
-        expect(config.common.verbose).to eq(false)
+        config.common.verbose = false
 
         config.set_flag(:verbose, true)
         expect(config.common.verbose).to eq(true)
