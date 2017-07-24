@@ -118,7 +118,7 @@ describe LimeCompiler::Configuration do
   end
 
   describe '.from_ini' do
-    describe "a syntactically correct configuration file" do
+    describe 'a syntactically correct configuration file' do
       user_conf_verbose = true
       user_conf_debug = true
 
@@ -128,15 +128,15 @@ describe LimeCompiler::Configuration do
       user_conf << "debug = #{user_conf_debug}\n"
       user_conf.flush
 
-      it "should be loadable" do
+      it 'should be loadable' do
         config = LimeCompiler::Configuration.from_ini(user_conf.path)
         expect(config).not_to eq(nil)
       end
 
-      context "loaded from disk" do
+      context 'loaded from disk' do
         config = LimeCompiler::Configuration.from_ini(user_conf.path)
 
-        it "should contain configs from the file" do
+        it 'should contain configs from the file' do
           expect(config.common.verbose).to eq(user_conf_verbose)
           expect(config.common.debug).to eq(user_conf_debug)
         end
@@ -145,7 +145,7 @@ describe LimeCompiler::Configuration do
   end
 
   describe '#merge!' do
-    describe "given two differing configurations" do
+    describe 'given two differing configurations' do
       config_a = LimeCompiler::Configuration.new
       config_b = LimeCompiler::Configuration.new
       default_verbose = config_b.common.verbose
@@ -153,12 +153,11 @@ describe LimeCompiler::Configuration do
       config_b.common.verbose = !default_verbose
       config_b.common.debug = !default_debug
 
-      it "#merge should modify config_a with values from config_b" do
+      it '#merge should modify config_a with values from config_b' do
         config_a.merge!(config_b)
         expect(config_a.common.verbose).to eq(config_b.common.verbose)
         expect(config_a.common.debug).to eq(config_b.common.debug)
       end
-
     end
   end
 end
