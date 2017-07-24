@@ -51,6 +51,20 @@ describe LimeCompiler::Configuration do
     end
   end
 
+  describe '#default?' do
+    context 'a new configuration' do
+      config = LimeCompiler::Configuration.new(load_config: false)
+
+      it 'has default configuration values' do
+        LimeCompiler::Configuration::CONFIG_SECTIONS.each do |section|
+          LimeCompiler::Configuration::SECTION_KEYS[section].each do |key|
+            expect(config.default?(section, key.to_sym)).to eq(true)
+          end
+        end
+      end
+    end
+  end
+
   describe '#to_h' do
     context 'given a new configuration' do
       config = LimeCompiler::Configuration.new

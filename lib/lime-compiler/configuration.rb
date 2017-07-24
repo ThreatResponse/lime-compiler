@@ -26,7 +26,8 @@ module LimeCompiler
                        remove_gpg_home aes_key_import_path gpg_key_import_path]
     }.freeze
 
-    def initialize
+    def initialize(load_config: true)
+      @load_config = load_config
       @user_config = nil
       @flags = {}
       @conf = defaults
@@ -132,6 +133,7 @@ module LimeCompiler
     end
 
     def config_from_default_location
+      return unless @load_config
       config = nil
       CONFIG_LOCATIONS.each do |path|
         if File.file?(File.expand_path(path))
