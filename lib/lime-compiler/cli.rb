@@ -42,9 +42,12 @@ module LimeCompiler
         c.syntax = 'configure'
         c.description = 'Configure lime-compiler options'
 
-        # c.action do |args, options|
-        c.action do |_, _|
-          puts 'todo prompt user for configuration'
+        c.option('--first-time', 'Perform first time setup')
+
+        c.action do |_, options|
+          options.default(first_time: false)
+          puts options.default.inspect
+          Configure.interactive(config, first_time: options.first_time)
         end
       end
 
