@@ -79,6 +79,11 @@ module LimeCompiler
       @conf
     end
 
+    def save!(path)
+      full_path = File.absolute_path(File.expand_path(path))
+      IniFile.new(content: to_h).write(filename: full_path)
+    end
+
     def self.from_ini(path)
       return unless File.file?(File.expand_path(path))
       ini_file = IniFile.load(File.expand_path(path))

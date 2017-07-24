@@ -117,6 +117,32 @@ describe LimeCompiler::Configuration do
     end
   end
 
+  describe '#save!' do
+    context 'given a custom configuration' do
+      config = LimeCompiler::Configuration.new
+      default_verbose = config.common.verbose
+      config.common.verbose = !default_verbose
+
+      tmp_file = Tempfile.new('saved-config')
+      writeable_path = tmp_file.path
+      tmp_file.close
+
+      it 'should save without error' do
+        config.save! writeable_path
+        expect(File.file?(writeable_path)).to eq(true)
+      end
+
+      context 'the saved configuration' do
+        it 'should contain custom configuration' do
+          new_config = LimeCompiler::Configuration.from_ini(writeable_path)
+          expect(new_config.common.verbose).not_to eq(default_verbose)
+        end
+      end
+
+      File.delete writeable_path if File.file?(writeable_path)
+    end
+  end
+
   describe '.from_ini' do
     describe 'a syntactically correct configuration file' do
       user_conf_verbose = true
