@@ -53,7 +53,7 @@ module LimeCompiler
       @conf = defaults
       if @user_config
         begin
-          @conf = Configuration.merge(@conf, Configuration.from_ini(@user_config))
+          merge!(Configuration.from_ini(@user_config))
         rescue RuntimeError => e
           # TODO: use application logger
           puts "Error merging configurations #{e}"
@@ -88,18 +88,18 @@ module LimeCompiler
       config
     end
 
-    def self.merge(default, config)
+    def merge!(config)
       CONFIG_SECTIONS.each do |section|
-        default[section] = OpenStruct.new(
-          if config[section].nil?
-            default[section].to_h
+        @conf[section] = OpenStruct.new(
+          if config.send(section).nil?
+            @conf[section].to_h
           else
-            default[section].to_h.merge(config[section].to_h)
+            @conf[section].to_h.merge(config.send(section).to_h)
           end
         )
       end
 
-      default
+      @conf
     end
 
     protected
@@ -116,11 +116,9 @@ module LimeCompiler
 
       config = config_from_default_location
 
-      if config
-        Configuration.merge(default_config, config)
-      else
-        default_config
-      end
+      return default_config unless config
+      @conf = default_config
+      merge! config
     end
 
     def get

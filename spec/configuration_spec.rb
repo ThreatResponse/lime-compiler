@@ -108,4 +108,22 @@ describe LimeCompiler::Configuration do
       end
     end
   end
+
+  describe '#merge!' do
+    describe "given two differing configurations" do
+      config_a = LimeCompiler::Configuration.new
+      config_b = LimeCompiler::Configuration.new
+      default_verbose = config_b.common.verbose
+      default_debug = config_b.common.debug
+      config_b.common.verbose = !default_verbose
+      config_b.common.debug = !default_debug
+
+      it "#merge should modify config_a with values from config_b" do
+        config_a.merge!(config_b)
+        expect(config_a.common.verbose).to eq(config_b.common.verbose)
+        expect(config_a.common.debug).to eq(config_b.common.debug)
+      end
+
+    end
+  end
 end
