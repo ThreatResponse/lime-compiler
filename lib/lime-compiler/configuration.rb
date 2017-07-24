@@ -52,14 +52,7 @@ module LimeCompiler
     def reload!
       # TODO: debug log message -> reloading config
       @conf = defaults
-      if @user_config
-        begin
-          merge!(Configuration.from_ini(@user_config))
-        rescue RuntimeError => e
-          # TODO: use application logger
-          puts "Error merging configurations #{e}"
-        end
-      end
+      merge!(Configuration.from_ini(@user_config)) if @user_config
       apply_flags!
     end
 

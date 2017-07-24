@@ -19,6 +19,27 @@ describe LimeCompiler::Configuration do
     end
   end
 
+  describe '#user_config=(value)' do
+    context 'given a new configuration' do
+      config = LimeCompiler::Configuration.new(load_config: false)
+      context 'and a syntactically correct configuration file' do
+        user_conf = Tempfile.new('user-config')
+        user_conf << "[common] \n"
+        user_conf << "verbose = true\n"
+        user_conf << "debug = true\n"
+        user_conf.flush
+
+        describe 'setting the user_config' do
+          it 'updates the configuration to reflect the user_config' do
+            config.user_config = user_conf.path
+            expect(config.common.verbose).to eq(true)
+            expect(config.common.debug).to eq(true)
+          end
+        end
+      end
+    end
+  end
+
   describe '#reload!' do
     context 'given a modified configuration' do
       config = LimeCompiler::Configuration.new
